@@ -54,4 +54,24 @@ public abstract class Socket {
 	
 	public abstract void receiveMessage(Message reply);
 	
+	/**
+	 * Decompoase a uri into the uri protocol
+	 * 
+	 * @param uri The uri to decompose
+	 * @return The corresponding protocol
+	 */
+	public String getProtocol(String uri){
+		return uri.substring(0, uri.indexOf(':'));
+	}
+	
+	/**
+	 * Decompoase a uri into the server id
+	 * 
+	 * @param uri The uri to decompose
+	 * @return The corresponding server id
+	 */
+	public String getServerID(String uri){
+		return uri.substring(uri.lastIndexOf('/')+1, uri.length());
+	}
+	
 }
