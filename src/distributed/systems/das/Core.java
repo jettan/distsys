@@ -1,5 +1,7 @@
 package distributed.systems.das;
 
+import java.rmi.*;
+
 import distributed.systems.das.presentation.BattleFieldViewer;
 import distributed.systems.das.units.Dragon;
 import distributed.systems.das.units.Player;
@@ -22,6 +24,14 @@ public class Core {
 	public static int playerCount;
 
 	public static void main(String[] args) {
+		
+		try {
+			java.rmi.registry.LocateRegistry.createRegistry(1099);
+		} catch (RemoteException e) {
+			System.err.println("Fatal error: could not create registry!");
+			e.printStackTrace();
+		}
+		
 		battlefield = BattleField.getBattleField();
 
 		/* All the dragons connect */

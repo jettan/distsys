@@ -27,4 +27,10 @@ public class LocalSocket extends Socket {
 		
 	}
 
+	@Override
+	public void receiveMessage(Message reply) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

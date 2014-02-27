@@ -1,5 +1,7 @@
 package distributed.systems.das;
 
+import java.rmi.*;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
 import distributed.systems.das.units.Dragon;
@@ -23,7 +25,7 @@ import distributed.systems.example.LocalSocket;
  * 
  * @author Pieter Anemaet, Boaz Pat-El
  */
-public class BattleField implements IMessageReceivedHandler {
+public class BattleField extends UnicastRemoteObject implements IMessageReceivedHandler {
 	/* The array of units */
 	private Unit[][] map;
 
@@ -48,7 +50,7 @@ public class BattleField implements IMessageReceivedHandler {
 	 * @param width of the battlefield
 	 * @param height of the battlefield
 	 */
-	private BattleField(int width, int height) {
+	private BattleField(int width, int height) throws RemoteException {
 		LocalSocket local = new LocalSocket();
 		
 		synchronized (this) {
@@ -68,9 +70,12 @@ public class BattleField implements IMessageReceivedHandler {
 	 * @return the battlefield.
 	 */
 	public static BattleField getBattleField() {
-		System.out.println("Getting battlefield...");
 		if (battlefield == null)
-			battlefield = new BattleField(MAP_WIDTH, MAP_HEIGHT);
+			try {
+				battlefield = new BattleField(MAP_WIDTH, MAP_HEIGHT);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
 		return battlefield;
 	}
 	

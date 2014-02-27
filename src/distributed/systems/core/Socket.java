@@ -51,4 +51,7 @@ public abstract class Socket {
 	 * @throws IDNotAssignedException If the serverid does not exist
 	 */
 	public abstract void sendMessage(Message reply, String origin) throws IDNotAssignedException;
+	
+	public abstract void receiveMessage(Message reply);
+	
 }

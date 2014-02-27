@@ -31,4 +31,10 @@ public class SynchronizedSocket extends Socket {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void receiveMessage(Message reply) {
+		// TODO Auto-generated method stub
+		
+	}
 }
