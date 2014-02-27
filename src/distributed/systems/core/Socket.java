@@ -5,10 +5,8 @@ import java.util.Collection;
 
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
-import distributed.systems.das.BattleField;
-import distributed.systems.das.units.Unit;
 
-public class Socket {
+public abstract class Socket {
 
 	/**
 	 * The registered handlers that can receive messages
@@ -29,18 +27,12 @@ public class Socket {
 	 * @param serverid The serverid to bind to
 	 * @throws AlreadyAssignedIDException If the serverid was already claimed
 	 */
-	public void register(String serverid) throws AlreadyAssignedIDException {
-		// TODO Auto-generated method stub
-		
-	}
+	public abstract void register(String serverid) throws AlreadyAssignedIDException;
 	
 	/**
 	 * Release our registered serverid
 	 */
-	public void unRegister() {
-		// TODO Auto-generated method stub
-		
-	}
+	public abstract void unRegister();
 
 	/**
 	 * Register a handler for received Messages
@@ -55,14 +47,8 @@ public class Socket {
 	 * Send a Message to a certain serverid
 	 * 
 	 * @param reply The message to send
-	 * @param origin The serverid to send to
+	 * @param origin The URI of the host to send to
 	 * @throws IDNotAssignedException If the serverid does not exist
 	 */
-	public void sendMessage(Message reply, String origin) throws IDNotAssignedException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	
-
+	public abstract void sendMessage(Message reply, String origin) throws IDNotAssignedException;
 }
