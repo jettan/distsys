@@ -12,6 +12,7 @@ import distributed.systems.core.IMessageReceivedHandler;
 import distributed.systems.core.Message;
 import distributed.systems.core.Socket;
 import distributed.systems.core.SynchronizedSocket;
+import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
 import distributed.systems.example.LocalSocket;
 
@@ -49,8 +50,9 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * Initialize the battlefield to the specified size 
 	 * @param width of the battlefield
 	 * @param height of the battlefield
+	 * @throws AlreadyAssignedIDException 
 	 */
-	private BattleField(int width, int height) throws RemoteException {
+	private BattleField(int width, int height) throws RemoteException, AlreadyAssignedIDException {
 		LocalSocket local = new LocalSocket();
 		
 		synchronized (this) {
@@ -74,6 +76,8 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 			try {
 				battlefield = new BattleField(MAP_WIDTH, MAP_HEIGHT);
 			} catch (RemoteException e) {
+				e.printStackTrace();
+			} catch (AlreadyAssignedIDException e) {
 				e.printStackTrace();
 			}
 		return battlefield;

@@ -2,9 +2,11 @@ package distributed.systems.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
+import distributed.systems.example.LocalSocket;
 
 public abstract class Socket {
 
@@ -14,11 +16,17 @@ public abstract class Socket {
 	private Collection<IMessageReceivedHandler> handlers;
 	
 	/**
+	 * All of the bound sockets
+	 */
+	private static ConcurrentHashMap<String, Socket> registeredSockets;
+	
+	/**
 	 * Create a new Socket for communicating messages to
 	 * serverids
 	 */
 	public Socket(){
 		handlers = new ArrayList<IMessageReceivedHandler>();
+		registeredSockets = new ConcurrentHashMap<String, Socket>();
 	}
 	
 	/**
@@ -50,7 +58,13 @@ public abstract class Socket {
 	 * @param origin The URI of the host to send to
 	 * @throws IDNotAssignedException If the serverid does not exist
 	 */
-	public abstract void sendMessage(Message reply, String origin) throws IDNotAssignedException;
+	public void sendMessage(Message reply, String origin) throws IDNotAssignedException{
+		if ("localsocket".equals(getProtocol(origin))){
+			new LocalSocket().sendMessage(reply, origin);
+		} else {
+			throw new IDNotAssignedException();
+		}
+	}
 	
 	public abstract void receiveMessage(Message reply);
 	
@@ -72,6 +86,28 @@ public abstract class Socket {
 	 */
 	public String getServerID(String uri){
 		return uri.substring(uri.lastIndexOf('/')+1, uri.length());
+	}
+	
+	/**
+	 * Try to register ourselves as a certain server
+	 * 
+	 * @param server The serverid to bind to
+	 * @param s The socket to register
+	 * @throws AlreadyAssignedIDException If this id was already registered
+	 */
+	protected void claim(String server, Socket s) throws AlreadyAssignedIDException{
+		if (registeredSockets.contains(server))
+			throw new AlreadyAssignedIDException();
+		registeredSockets.put(server, s);
+	}
+	
+	/**
+	 * Release a local lease on a server name
+	 * 
+	 * @param server The server id to release
+	 */
+	protected void release(String server){
+		registeredSockets.remove(server);
 	}
 	
 }
