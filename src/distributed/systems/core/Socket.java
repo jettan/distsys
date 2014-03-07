@@ -13,12 +13,12 @@ public abstract class Socket {
 	/**
 	 * The registered handlers that can receive messages
 	 */
-	private Collection<IMessageReceivedHandler> handlers;
+	protected Collection<IMessageReceivedHandler> handlers;
 	
 	/**
 	 * All of the bound sockets
 	 */
-	private static ConcurrentHashMap<String, Socket> registeredSockets;
+	protected static ConcurrentHashMap<String, Socket> registeredSockets;
 	
 	/**
 	 * Create a new Socket for communicating messages to

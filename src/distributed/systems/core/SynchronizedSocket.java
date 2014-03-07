@@ -1,5 +1,8 @@
 package distributed.systems.core;
 
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
 
@@ -7,7 +10,10 @@ import distributed.systems.core.exception.IDNotAssignedException;
  * A serversocket implementation
  */
 public class SynchronizedSocket extends Socket {
-	public SynchronizedSocket() {}
+	public SynchronizedSocket() {
+		handlers = new ArrayList<IMessageReceivedHandler>();
+		registeredSockets = new ConcurrentHashMap<String, Socket>();
+	}
 
 	public SynchronizedSocket(Socket localSocket) {
 		// TODO Auto-generated constructor stub

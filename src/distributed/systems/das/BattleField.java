@@ -1,5 +1,6 @@
 package distributed.systems.das;
 
+import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -27,6 +28,11 @@ import distributed.systems.example.LocalSocket;
  * @author Pieter Anemaet, Boaz Pat-El
  */
 public class BattleField extends UnicastRemoteObject implements IMessageReceivedHandler {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/* The array of units */
 	private Unit[][] map;
 
@@ -41,7 +47,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 */
 	private int lastUnitID = 0;
 
-	public final static String serverID = "server";
+	public final static String serverID = "5313";
 	public final static int MAP_WIDTH = 25;
 	public final static int MAP_HEIGHT = 25;
 	private ArrayList <Unit> units; 
@@ -57,8 +63,21 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		
 		synchronized (this) {
 			map = new Unit[width][height];
+			try {
+				// Bind the battlefield to the RMI registry.
+				java.rmi.Naming.bind(BattleField.serverID, this);
+				
+				System.out.println("Bound battlefield to RMI registry!");
+				
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				
+			} catch (AlreadyBoundException e) {
+				e.printStackTrace();
+			}
+			
 			local.register(BattleField.serverID);
-			serverSocket = new SynchronizedSocket();
+			serverSocket = new SynchronizedSocket(local);
 			serverSocket.addMessageReceivedHandler(this);
 			units = new ArrayList<Unit>();
 		}
