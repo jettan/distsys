@@ -46,9 +46,10 @@ public class Dragon extends Unit implements Runnable, Serializable {
 		/* Create a random delay */
 		timeBetweenTurns = (int)(Math.random() * (MAX_TIME_BETWEEN_TURNS - MIN_TIME_BETWEEN_TURNS)) + MIN_TIME_BETWEEN_TURNS;
 
-		if (!spawn(x, y))
+		if (!spawn(x, y)) {
+			System.err.println("Could not spawn dragon on location " + x + ", " + y + ".");
 			return; // We could not spawn on the battlefield
-
+		}
 		/* Awaken the dragon */
 		//new Thread(this).start();
 		runnerThread = new Thread(this);

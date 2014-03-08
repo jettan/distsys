@@ -5,18 +5,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
+import distributed.systems.example.LocalSocket;
 
 /**
  * A serversocket implementation
  */
 public class SynchronizedSocket extends Socket {
+	private LocalSocket socket;
+	
 	public SynchronizedSocket() {
 		handlers = new ArrayList<IMessageReceivedHandler>();
 		registeredSockets = new ConcurrentHashMap<String, Socket>();
 	}
 
 	public SynchronizedSocket(Socket localSocket) {
-		// TODO Auto-generated constructor stub
+		handlers = new ArrayList<IMessageReceivedHandler>();
+		registeredSockets = new ConcurrentHashMap<String, Socket>();
+		socket = (LocalSocket) localSocket;
 	}
 
 	@Override
@@ -34,7 +39,7 @@ public class SynchronizedSocket extends Socket {
 	@Override
 	public void sendMessage(Message reply, String origin)
 			throws IDNotAssignedException {
-		// TODO Auto-generated method stub
+		socket.sendMessage(reply, origin);
 		
 	}
 

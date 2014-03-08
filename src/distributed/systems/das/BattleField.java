@@ -222,6 +222,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	}
 
 	public void onMessageReceived(Message msg) {
+		System.out.println("Received message!");
 		Message reply = null;
 		String origin = (String)msg.get("origin");
 		MessageRequest request = (MessageRequest)msg.get("request");

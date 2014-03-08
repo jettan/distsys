@@ -235,6 +235,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		 * the unit has actually spawned at the
 		 * designated position. 
 		 */
+		
 		int id = localMessageCounter++;
 		Message spawnMessage = new Message();
 		spawnMessage.put("request", MessageRequest.spawnUnit);
@@ -243,6 +244,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		spawnMessage.put("unit", this);
 		spawnMessage.put("id", id);
 
+		System.out.println("Trying to send spawn message...");
 		// Send a spawn message
 		try {
 			clientSocket.sendMessage(spawnMessage, "localsocket://" + BattleField.serverID);

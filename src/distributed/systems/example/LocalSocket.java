@@ -17,7 +17,7 @@ import distributed.systems.core.exception.IDNotAssignedException;
  */
 public class LocalSocket extends Socket {
 	
-	private java.net.Socket socket = null;
+	private java.net.Socket socket = new java.net.Socket();
 	private int servernum = -1;
 	private final static int BASE_PORT = 26000;
 	
@@ -29,14 +29,14 @@ public class LocalSocket extends Socket {
 	 */
 	public void register(String serverid) throws AlreadyAssignedIDException{
 		servernum = Integer.parseInt(serverid);
-		java.net.Socket socket = null;
+		//java.net.Socket socket = null;
 		try {
-			socket = new java.net.Socket();
 			socket.setKeepAlive(true);
 			socket.setReuseAddress(true);
 			//Bind later, otherwise reuseAddress and keepAlive are ignored
 			socket.bind(new InetSocketAddress("127.0.0.1", BASE_PORT+servernum));
 			claim(serverid, this);
+			System.out.println("Registered socket!");
 		} catch (UnknownHostException e) {
 			throw new AlreadyAssignedIDException();
 		} catch (IOException e) {
@@ -81,6 +81,7 @@ public class LocalSocket extends Socket {
 
 	@Override
 	public void receiveMessage(Message reply) {
+		System.out.println("We received a message!");
 		// TODO Auto-generated method stub
 		
 	}

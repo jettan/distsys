@@ -58,7 +58,8 @@ public abstract class Socket {
 	 * @param origin The URI of the host to send to
 	 * @throws IDNotAssignedException If the serverid does not exist
 	 */
-	public void sendMessage(Message reply, String origin) throws IDNotAssignedException{
+	public void sendMessage(Message reply, String origin) throws IDNotAssignedException {
+		System.out.println("Sending message...");
 		if ("localsocket".equals(getProtocol(origin))){
 			new LocalSocket().sendMessage(reply, origin);
 		} else {
