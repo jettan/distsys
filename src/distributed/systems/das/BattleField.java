@@ -47,7 +47,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 */
 	private int lastUnitID = 0;
 
-	public final static String serverID = "5313";
+	public final static String serverID = "5357";
 	public final static int MAP_WIDTH = 25;
 	public final static int MAP_HEIGHT = 25;
 	private ArrayList <Unit> units; 
@@ -63,18 +63,6 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		
 		synchronized (this) {
 			map = new Unit[width][height];
-			try {
-				// Bind the battlefield to the RMI registry.
-				java.rmi.Naming.bind(BattleField.serverID, this);
-				
-				System.out.println("Bound battlefield to RMI registry!");
-				
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-				
-			} catch (AlreadyBoundException e) {
-				e.printStackTrace();
-			}
 			
 			local.register(BattleField.serverID);
 			serverSocket = new SynchronizedSocket(local);

@@ -1,6 +1,7 @@
 package distributed.systems.das.units;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,8 +72,9 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 	 * 
 	 * @param maxHealth is the maximum health of 
 	 * this specific unit.
+	 * @throws RemoteException 
 	 */
-	public Unit(int maxHealth, int attackPoints) {
+	public Unit(int maxHealth, int attackPoints) throws RemoteException {
 		Socket localSocket = new LocalSocket();
 
 		messageList = new HashMap<Integer, Message>();

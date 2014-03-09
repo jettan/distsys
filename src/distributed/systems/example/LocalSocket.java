@@ -1,12 +1,11 @@
 package distributed.systems.example;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
-import java.util.concurrent.ConcurrentHashMap;
+import java.net.MalformedURLException;
+import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 
+import distributed.systems.core.IRMIReceiver;
 import distributed.systems.core.Message;
 import distributed.systems.core.Socket;
 import distributed.systems.core.exception.AlreadyAssignedIDException;
@@ -17,34 +16,31 @@ import distributed.systems.core.exception.IDNotAssignedException;
  */
 public class LocalSocket extends Socket {
 	
-	private java.net.Socket socket = new java.net.Socket();
-	private int servernum = -1;
-	private final static int BASE_PORT = 26000;
+	private String id;
 	
+	public LocalSocket() throws RemoteException {
+		super();
+	}
+
 	/**
 	 * Claim a serverid name for ourselves
 	 * 
-	 * @param serverid The id to claim (expected to be an integer in String form)
+	 * TODO broadcast synchronize with other servers??
+	 * 
+	 * @param serverid The id to claim
 	 * @throws AlreadyAssignedIDException if the socket could not be bound or the id already exists
 	 */
 	public void register(String serverid) throws AlreadyAssignedIDException{
-		servernum = Integer.parseInt(serverid);
-		//java.net.Socket socket = null;
+		this.id = serverid;
 		try {
-			socket.setKeepAlive(true);
-			socket.setReuseAddress(true);
-			//Bind later, otherwise reuseAddress and keepAlive are ignored
-			socket.bind(new InetSocketAddress("127.0.0.1", BASE_PORT+servernum));
-			claim(serverid, this);
-			System.out.println("Registered socket!");
-		} catch (UnknownHostException e) {
-			throw new AlreadyAssignedIDException();
-		} catch (IOException e) {
-			throw new AlreadyAssignedIDException();
-		} catch (AlreadyAssignedIDException e){
-			unRegister();
+			java.rmi.Naming.bind(serverid, this);
+			System.out.println("Bound to " + serverid);
+		} catch (MalformedURLException | RemoteException
+				| AlreadyBoundException e) {
+			e.printStackTrace();
 			throw new AlreadyAssignedIDException();
 		}
+
 	}
 
 	/**
@@ -52,29 +48,28 @@ public class LocalSocket extends Socket {
 	 */
 	@Override
 	public void unRegister() {
-		release("" + servernum);
-		servernum = -1;
-		try {
-			socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		if (id != null)
+			try {
+				java.rmi.Naming.unbind(id);
+			} catch (RemoteException | MalformedURLException
+					| NotBoundException e) {
+				e.printStackTrace();
+			}
 	}
 
 	/**
 	 * Send a message over our socket
-	 * 
-	 * DOES NOT CLOSE THE SOCKET <- Kind of important, everything else depends on this
 	 */
 	@Override
 	public void sendMessage(Message reply, String origin)
 			throws IDNotAssignedException {
-		ObjectOutputStream oos;
+		IRMIReceiver remoteReceiver;
+		String rmiURL = "rmi://localhost:1101/" + getServerID(origin);
+		System.out.println("Looking up: " + rmiURL);
 		try {
-			oos = new ObjectOutputStream(socket.getOutputStream());
-			oos.writeObject(reply);
-			oos.flush();
-		} catch (IOException e) {
+			remoteReceiver = (IRMIReceiver) java.rmi.Naming.lookup(rmiURL);
+			remoteReceiver.receiveMessage(reply);
+		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			e.printStackTrace();
 		}
 	}

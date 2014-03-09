@@ -1,6 +1,7 @@
 package distributed.systems.das.units;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
 
 import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
@@ -34,8 +35,9 @@ public class Player extends Unit implements Runnable, Serializable {
 	/**
 	 * Create a player, initialize both 
 	 * the hit and the attackpoints. 
+	 * @throws RemoteException 
 	 */
-	public Player(int x, int y) {
+	public Player(int x, int y) throws RemoteException {
 		/* Initialize the hitpoints and attackpoints */
 		super((int)(Math.random() * (MAX_HITPOINTS - MIN_HITPOINTS) + MIN_HITPOINTS), (int)(Math.random() * (MAX_ATTACKPOINTS - MIN_ATTACKPOINTS) + MIN_ATTACKPOINTS));
 

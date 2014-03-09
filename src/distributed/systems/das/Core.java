@@ -15,9 +15,9 @@ import distributed.systems.das.units.Player;
  * @author Pieter Anemaet, Boaz Pat-El
  */
 public class Core {
-	public static final int MIN_PLAYER_COUNT = 30;
-	public static final int MAX_PLAYER_COUNT = 60;
-	public static final int DRAGON_COUNT = 20;
+	public static final int MIN_PLAYER_COUNT = 0;//30; TODO
+	public static final int MAX_PLAYER_COUNT = 0;//60;
+	public static final int DRAGON_COUNT = 1;//20;
 	public static final int TIME_BETWEEN_PLAYER_LOGIN = 5000; // In milliseconds
 	
 	public static BattleField battlefield; 
@@ -26,7 +26,7 @@ public class Core {
 	public static void main(String[] args) {
 		
 		try {
-			java.rmi.registry.LocateRegistry.createRegistry(1099);
+			java.rmi.registry.LocateRegistry.createRegistry(1101);
 		} catch (RemoteException e) {
 			System.err.println("Fatal error: could not create registry!");
 			e.printStackTrace();
@@ -56,7 +56,11 @@ public class Core {
 			 */
 			new Thread(new Runnable() {
 				public void run() {
-					new Dragon(finalX, finalY);
+					try {
+						new Dragon(finalX, finalY);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
 				}
 			}).start();
 
@@ -86,7 +90,11 @@ public class Core {
 			 */
 			new Thread(new Runnable() {
 				public void run() {
-					new Player(finalX, finalY);
+					try {
+						new Player(finalX, finalY);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
 				}
 			}).start();
 			
@@ -125,7 +133,11 @@ public class Core {
 				final int finalY = y;
 
 				if (battlefield.getUnit(x, y) == null) {
-					new Player(finalX, finalY);
+					try {
+						new Player(finalX, finalY);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
 					/* Create the new player in a separate
 					 * thread, making sure it does not 
 					 * block the system.

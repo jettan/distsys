@@ -1,5 +1,7 @@
 package distributed.systems.core;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,7 +10,9 @@ import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
 import distributed.systems.example.LocalSocket;
 
-public abstract class Socket {
+public abstract class Socket extends UnicastRemoteObject implements IRMIReceiver{
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The registered handlers that can receive messages
@@ -24,7 +28,7 @@ public abstract class Socket {
 	 * Create a new Socket for communicating messages to
 	 * serverids
 	 */
-	public Socket(){
+	public Socket() throws RemoteException{
 		handlers = new ArrayList<IMessageReceivedHandler>();
 		registeredSockets = new ConcurrentHashMap<String, Socket>();
 	}
@@ -61,7 +65,11 @@ public abstract class Socket {
 	public void sendMessage(Message reply, String origin) throws IDNotAssignedException {
 		System.out.println("Sending message...");
 		if ("localsocket".equals(getProtocol(origin))){
-			new LocalSocket().sendMessage(reply, origin);
+			try {
+				new LocalSocket().sendMessage(reply, origin);
+			} catch (RemoteException e) {
+				throw new IDNotAssignedException();
+			}
 		} else {
 			throw new IDNotAssignedException();
 		}

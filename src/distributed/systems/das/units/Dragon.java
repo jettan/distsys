@@ -1,6 +1,7 @@
 package distributed.systems.das.units;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 import distributed.systems.das.BattleField;
@@ -36,9 +37,10 @@ public class Dragon extends Unit implements Runnable, Serializable {
 	/**
 	 * Spawn a new dragon, initialize the 
 	 * reaction speed 
+	 * @throws RemoteException 
 	 *
 	 */
-	public Dragon(int x, int y) {
+	public Dragon(int x, int y) throws RemoteException {
 		/* Spawn the dragon with a random number of hitpoints between
 		 * 50..100 and 5..20 attackpoints. */
 		super((int)(Math.random() * (MAX_HITPOINTS - MIN_HITPOINTS) + MIN_HITPOINTS), (int)(Math.random() * (MAX_ATTACKPOINTS - MIN_ATTACKPOINTS) + MIN_ATTACKPOINTS));
