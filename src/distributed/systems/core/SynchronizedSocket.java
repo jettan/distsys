@@ -1,9 +1,6 @@
 package distributed.systems.core;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
 import distributed.systems.example.LocalSocket;
@@ -12,16 +9,17 @@ import distributed.systems.example.LocalSocket;
  * A serversocket implementation
  */
 public class SynchronizedSocket extends Socket {
+
+	private static final long serialVersionUID = 1L;
+	
 	private LocalSocket socket;
 	
 	public SynchronizedSocket() throws RemoteException{
-		handlers = new ArrayList<IMessageReceivedHandler>();
-		registeredSockets = new ConcurrentHashMap<String, Socket>();
+		super();
 	}
 
 	public SynchronizedSocket(Socket localSocket) throws RemoteException{
-		handlers = new ArrayList<IMessageReceivedHandler>();
-		registeredSockets = new ConcurrentHashMap<String, Socket>();
+		super();
 		socket = (LocalSocket) localSocket;
 	}
 

@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
-import distributed.systems.example.LocalSocket;
 
 public abstract class Socket extends UnicastRemoteObject implements IRMIReceiver{
 
