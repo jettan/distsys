@@ -41,10 +41,4 @@ public class SynchronizedSocket extends Socket {
 		socket.sendMessage(reply, origin);
 		
 	}
-
-	@Override
-	public void receiveMessage(Message reply) {
-		// TODO Auto-generated method stub
-		
-	}
 }
