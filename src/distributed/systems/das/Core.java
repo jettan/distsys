@@ -26,7 +26,7 @@ public class Core {
 	public static void main(String[] args) {
 		
 		try {
-			java.rmi.registry.LocateRegistry.createRegistry(1101);
+			java.rmi.registry.LocateRegistry.createRegistry(1099);
 		} catch (RemoteException e) {
 			System.err.println("Fatal error: could not create registry!");
 			e.printStackTrace();

@@ -64,7 +64,7 @@ public class LocalSocket extends Socket {
 	public void sendMessage(Message reply, String origin)
 			throws IDNotAssignedException {
 		IRMIReceiver remoteReceiver;
-		String rmiURL = "rmi://localhost:1101/" + getServerID(origin);
+		String rmiURL = "rmi://localhost:1099/" + getServerID(origin);
 		System.out.println("Looking up: " + rmiURL);
 		try {
 			remoteReceiver = (IRMIReceiver) java.rmi.Naming.lookup(rmiURL);
