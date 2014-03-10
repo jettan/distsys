@@ -27,14 +27,12 @@ public class SynchronizedSocket extends Socket {
 
 	@Override
 	public void register(String serverid) throws AlreadyAssignedIDException {
-		// TODO Auto-generated method stub
-		
+		socket.register(serverid);
 	}
 
 	@Override
 	public void unRegister() {
-		// TODO Auto-generated method stub
-		
+		socket.unRegister();
 	}
 
 	@Override
