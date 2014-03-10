@@ -1,12 +1,13 @@
 package distributed.systems.example;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
+import distributed.systems.core.IMessageReceivedHandler;
 import distributed.systems.core.Message;
 import distributed.systems.core.Socket;
 import distributed.systems.core.exception.AlreadyAssignedIDException;
@@ -15,36 +16,24 @@ import distributed.systems.core.exception.IDNotAssignedException;
 /**
  * A localhost socket
  */
-public class LocalSocket extends Socket {
+public class LocalSocket extends Socket implements Serializable {
 	
-	private java.net.Socket socket = new java.net.Socket();
-	private int servernum = -1;
-	private final static int BASE_PORT = 26000;
+	private String id;
 	
+	public LocalSocket() throws RemoteException {
+		super();
+	}
+
 	/**
 	 * Claim a serverid name for ourselves
 	 * 
-	 * @param serverid The id to claim (expected to be an integer in String form)
+	 * TODO broadcast synchronize with other servers??
+	 * 
+	 * @param serverid The id to claim
 	 * @throws AlreadyAssignedIDException if the socket could not be bound or the id already exists
 	 */
 	public void register(String serverid) throws AlreadyAssignedIDException{
-		servernum = Integer.parseInt(serverid);
-		//java.net.Socket socket = null;
-		try {
-			socket.setKeepAlive(true);
-			socket.setReuseAddress(true);
-			//Bind later, otherwise reuseAddress and keepAlive are ignored
-			socket.bind(new InetSocketAddress("127.0.0.1", BASE_PORT+servernum));
-			claim(serverid, this);
-			System.out.println("Registered socket!");
-		} catch (UnknownHostException e) {
-			throw new AlreadyAssignedIDException();
-		} catch (IOException e) {
-			throw new AlreadyAssignedIDException();
-		} catch (AlreadyAssignedIDException e){
-			unRegister();
-			throw new AlreadyAssignedIDException();
-		}
+		this.setId(serverid);
 	}
 
 	/**
@@ -52,38 +41,66 @@ public class LocalSocket extends Socket {
 	 */
 	@Override
 	public void unRegister() {
-		release("" + servernum);
-		servernum = -1;
-		try {
-			socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		if (getId() != null)
+			try {
+				java.rmi.Naming.unbind(getId());
+			} catch (RemoteException | MalformedURLException
+					| NotBoundException e) {
+				e.printStackTrace();
+			}
 	}
 
 	/**
 	 * Send a message over our socket
-	 * 
-	 * DOES NOT CLOSE THE SOCKET <- Kind of important, everything else depends on this
 	 */
 	@Override
 	public void sendMessage(Message reply, String origin)
 			throws IDNotAssignedException {
-		ObjectOutputStream oos;
+		
 		try {
-			oos = new ObjectOutputStream(socket.getOutputStream());
-			oos.writeObject(reply);
-			oos.flush();
-		} catch (IOException e) {
+			String [] names = java.rmi.Naming.list("rmi://localhost:1099");
+			System.out.println("Printing all names in the registry...");
+			System.out.println("=====================================");
+			for (String name : names) {
+				System.out.println(name);
+			}
+			System.out.println("================END==================");
+		} catch (Exception e) {
+			
+		}
+		
+		String rmiURL = "rmi://localhost:1099/" + getServerID(origin);
+		System.out.println("Looking up: " + rmiURL);
+		try {
+			
+			// Look up the serverid immediately instead of the url since the naming lookup works like this.
+			IMessageReceivedHandler remoteReceiver = (IMessageReceivedHandler) java.rmi.Naming.lookup(getServerID(origin)); // y u no work!?
+			remoteReceiver.onMessageReceived(reply);
+		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void receiveMessage(Message reply) {
-		System.out.println("We received a message!");
-		// TODO Auto-generated method stub
-		
+	public void addMessageReceivedHandler(IMessageReceivedHandler handler)  {
+		try {
+			System.out.println("Trying to bind serverid " + this.getId() + " to RMI registry.");
+			java.rmi.Naming.bind(this.getId(), handler);
+			handlers.add(handler);
+			System.out.println("Succesfully bound " + this.getId() + " to RMI registry.");
+		} catch (MalformedURLException | RemoteException
+				| AlreadyBoundException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	private void setId(String id) {
+		this.id = id;
 	}
 
 }

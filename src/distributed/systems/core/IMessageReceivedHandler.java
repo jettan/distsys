@@ -1,6 +1,6 @@
 package distributed.systems.core;
 
-import java.rmi.Remote;
+import java.rmi.*;
 
 /**
  * Interface for classes that can handle incoming Message

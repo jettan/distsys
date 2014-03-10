@@ -1,6 +1,5 @@
 package distributed.systems.das;
 
-import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 */
 	private int lastUnitID = 0;
 
-	public final static String serverID = "5313";
+	public final static String serverID = "server";
 	public final static int MAP_WIDTH = 25;
 	public final static int MAP_HEIGHT = 25;
 	private ArrayList <Unit> units; 
@@ -63,18 +62,6 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		
 		synchronized (this) {
 			map = new Unit[width][height];
-			try {
-				// Bind the battlefield to the RMI registry.
-				java.rmi.Naming.bind(BattleField.serverID, this);
-				
-				System.out.println("Bound battlefield to RMI registry!");
-				
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-				
-			} catch (AlreadyBoundException e) {
-				e.printStackTrace();
-			}
 			
 			local.register(BattleField.serverID);
 			serverSocket = new SynchronizedSocket(local);
@@ -230,11 +217,16 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		switch(request)
 		{
 			case spawnUnit:
+			{
+				System.out.println("Received message to spawn unit!");
 				this.spawnUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
 				break;
+			}
 			case putUnit:
+			{
 				this.putUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
 				break;
+			}
 			case getUnit:
 			{
 				reply = new Message();
@@ -289,6 +281,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				break;
 			}
 			case moveUnit:
+			{
 				reply = new Message();
 				this.moveUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
 				/* Copy the id of the message so that the unit knows 
@@ -296,14 +289,19 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				 */
 				reply.put("id", msg.get("id"));
 				break;
+			}
 			case removeUnit:
+			{
 				this.removeUnit((Integer)msg.get("x"), (Integer)msg.get("y"));
 				return;
+			}
 		}
 
 		try {
-			if (reply != null)
+			if (reply != null && origin != null) {
+				System.out.println("Sending reply...");
 				serverSocket.sendMessage(reply, origin);
+			}
 		}
 		catch(IDNotAssignedException idnae)  {
 			// Could happen if the target already logged out

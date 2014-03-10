@@ -1,12 +1,12 @@
 package distributed.systems.core;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
-import distributed.systems.example.LocalSocket;
 
 public abstract class Socket {
 
@@ -24,7 +24,7 @@ public abstract class Socket {
 	 * Create a new Socket for communicating messages to
 	 * serverids
 	 */
-	public Socket(){
+	public Socket() throws RemoteException{
 		handlers = new ArrayList<IMessageReceivedHandler>();
 		registeredSockets = new ConcurrentHashMap<String, Socket>();
 	}
@@ -47,9 +47,7 @@ public abstract class Socket {
 	 * 
 	 * @param handler The handler to pass received Messages to
 	 */
-	public void addMessageReceivedHandler(IMessageReceivedHandler handler) {
-		handlers.add(handler);
-	}
+	public abstract void addMessageReceivedHandler(IMessageReceivedHandler handler);
 
 	/**
 	 * Send a Message to a certain serverid
@@ -58,16 +56,13 @@ public abstract class Socket {
 	 * @param origin The URI of the host to send to
 	 * @throws IDNotAssignedException If the serverid does not exist
 	 */
-	public void sendMessage(Message reply, String origin) throws IDNotAssignedException {
-		System.out.println("Sending message...");
-		if ("localsocket".equals(getProtocol(origin))){
-			new LocalSocket().sendMessage(reply, origin);
-		} else {
-			throw new IDNotAssignedException();
+	public abstract void sendMessage(Message reply, String origin) throws IDNotAssignedException;
+	
+	public void receiveMessage(Message reply) throws RemoteException{
+		for (IMessageReceivedHandler handler : handlers){
+			handler.onMessageReceived(reply);
 		}
 	}
-	
-	public abstract void receiveMessage(Message reply);
 	
 	/**
 	 * Decompoase a uri into the uri protocol
@@ -86,6 +81,7 @@ public abstract class Socket {
 	 * @return The corresponding server id
 	 */
 	public String getServerID(String uri){
+		System.out.println("uri = " + uri);
 		return uri.substring(uri.lastIndexOf('/')+1, uri.length());
 	}
 	
