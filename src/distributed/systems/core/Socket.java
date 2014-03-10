@@ -1,7 +1,6 @@
 package distributed.systems.core;
 
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,9 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
 
-public abstract class Socket extends UnicastRemoteObject implements IRMIReceiver{
-
-	private static final long serialVersionUID = 1L;
+public abstract class Socket {
 
 	/**
 	 * The registered handlers that can receive messages
@@ -50,9 +47,7 @@ public abstract class Socket extends UnicastRemoteObject implements IRMIReceiver
 	 * 
 	 * @param handler The handler to pass received Messages to
 	 */
-	public void addMessageReceivedHandler(IMessageReceivedHandler handler) {
-		handlers.add(handler);
-	}
+	public abstract void addMessageReceivedHandler(IMessageReceivedHandler handler);
 
 	/**
 	 * Send a Message to a certain serverid
@@ -63,7 +58,6 @@ public abstract class Socket extends UnicastRemoteObject implements IRMIReceiver
 	 */
 	public abstract void sendMessage(Message reply, String origin) throws IDNotAssignedException;
 	
-	@Override
 	public void receiveMessage(Message reply) throws RemoteException{
 		for (IMessageReceivedHandler handler : handlers){
 			handler.onMessageReceived(reply);
@@ -87,6 +81,7 @@ public abstract class Socket extends UnicastRemoteObject implements IRMIReceiver
 	 * @return The corresponding server id
 	 */
 	public String getServerID(String uri){
+		System.out.println("uri = " + uri);
 		return uri.substring(uri.lastIndexOf('/')+1, uri.length());
 	}
 	
