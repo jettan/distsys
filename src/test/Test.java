@@ -20,6 +20,8 @@ public class Test {
 		ls.unRegister();
 		
 		java.rmi.server.UnicastRemoteObject.unexportObject(reg,true);
+		
+		System.exit(0);
 	}
 	
 }

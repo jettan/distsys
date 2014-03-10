@@ -76,11 +76,4 @@ public class LocalSocket extends Socket {
 		}
 	}
 
-	@Override
-	public void receiveMessage(Message reply) {
-		System.out.println("We received a message!");
-		// TODO Auto-generated method stub
-		
-	}
-
 }

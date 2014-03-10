@@ -62,20 +62,14 @@ public abstract class Socket extends UnicastRemoteObject implements IRMIReceiver
 	 * @param origin The URI of the host to send to
 	 * @throws IDNotAssignedException If the serverid does not exist
 	 */
-	public void sendMessage(Message reply, String origin) throws IDNotAssignedException {
-		System.out.println("Sending message...");
-		if ("localsocket".equals(getProtocol(origin))){
-			try {
-				new LocalSocket().sendMessage(reply, origin);
-			} catch (RemoteException e) {
-				throw new IDNotAssignedException();
-			}
-		} else {
-			throw new IDNotAssignedException();
+	public abstract void sendMessage(Message reply, String origin) throws IDNotAssignedException;
+	
+	@Override
+	public void receiveMessage(Message reply) throws RemoteException{
+		for (IMessageReceivedHandler handler : handlers){
+			handler.onMessageReceived(reply);
 		}
 	}
-	
-	public abstract void receiveMessage(Message reply);
 	
 	/**
 	 * Decompoase a uri into the uri protocol
