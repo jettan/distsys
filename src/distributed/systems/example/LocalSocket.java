@@ -16,6 +16,8 @@ import distributed.systems.core.exception.IDNotAssignedException;
  */
 public class LocalSocket extends Socket {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private String id;
 	
 	public LocalSocket() throws RemoteException {
