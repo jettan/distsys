@@ -1,6 +1,7 @@
 package distributed.systems.das;
 
 import java.rmi.*;
+import java.rmi.registry.Registry;
 
 import distributed.systems.das.presentation.BattleFieldViewer;
 import distributed.systems.das.units.Dragon;
@@ -25,8 +26,10 @@ public class Core {
 
 	public static void main(String[] args) {
 		
+		Registry reg = null;
+		
 		try {
-			java.rmi.registry.LocateRegistry.createRegistry(1099);
+			reg = java.rmi.registry.LocateRegistry.createRegistry(1099);
 		} catch (RemoteException e) {
 			System.err.println("Fatal error: could not create registry!");
 			e.printStackTrace();
@@ -159,6 +162,13 @@ public class Core {
 		 * the socketmonitor close down.
 		 */
 		BattleField.getBattleField().shutdown();
+		
+		try {
+			java.rmi.server.UnicastRemoteObject.unexportObject(reg,true);
+		} catch (NoSuchObjectException e) {
+			e.printStackTrace();
+		}
+		
 		System.exit(0); // Stop all running processes
 	}
 
