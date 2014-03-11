@@ -136,21 +136,19 @@ public class Core {
 				final int finalY = y;
 
 				if (battlefield.getUnit(x, y) == null) {
-					try {
-						new Player(finalX, finalY);
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
 					/* Create the new player in a separate
 					 * thread, making sure it does not 
 					 * block the system.
-					 *
+					 */
 					new Thread(new Runnable() {
 						public void run() {
-							new Player(finalX, finalY);
+							try {
+								new Player(finalX, finalY);
+							} catch (RemoteException e) {
+								e.printStackTrace();
+							}
 						}
 					}).start();
-					*/
 					playerCount++;
 				}
 			} catch (InterruptedException e) {

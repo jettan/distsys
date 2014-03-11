@@ -48,7 +48,6 @@ public class Player extends Unit implements Runnable, Serializable {
 			return; // We could not spawn on the battlefield
 
 		/* Create a new player thread */
-		//new Thread(this).start();
 		runnerThread = new Thread(this);
 		runnerThread.start();
 	}
