@@ -296,7 +296,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		}
 
 		try {
-			if (reply != null && origin != null) {
+			if (reply != null) {
 				serverSocket.sendMessage(reply, origin);
 			}
 		}

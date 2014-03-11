@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
@@ -77,7 +78,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 	public Unit(int maxHealth, int attackPoints) throws RemoteException {
 		Socket localSocket = new LocalSocket();
 
-		messageList = new HashMap<Integer, Message>();
+		messageList = new ConcurrentHashMap<Integer, Message>();
 
 		// Initialize the max health and health
 		hitPoints = maxHitPoints = maxHealth;
@@ -137,6 +138,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 			damageMessage.put("y", y);
 			damageMessage.put("damage", damage);
 			damageMessage.put("id", id);
+			damageMessage.put("origin", "D" + unitID);
 		}
 		
 		// Send a spawn message
@@ -163,6 +165,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 			healMessage.put("y", y);
 			healMessage.put("healed", healed);
 			healMessage.put("id", id);
+			healMessage.put("origin", "D" + unitID);
 		}
 
 		// Send a spawn message
@@ -245,6 +248,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		spawnMessage.put("y", y);
 		spawnMessage.put("unit", this);
 		spawnMessage.put("id", id);
+		spawnMessage.put("origin", "D" + unitID);
 
 		// Send a spawn message
 		try {
@@ -253,7 +257,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 			System.err.println("No server found while spawning unit at location (" + x + ", " + y + ")");
 			return false;
 		}
-
+		
 		// Wait for the unit to be placed
 		getUnit(x, y);
 		
@@ -273,6 +277,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		getMessage.put("x", x);
 		getMessage.put("y", y);
 		getMessage.put("id", id);
+		getMessage.put("origin", "D" + unitID);
 
 		// Send the getUnit message
 		try {
@@ -311,6 +316,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		getMessage.put("x", x);
 		getMessage.put("y", y);
 		getMessage.put("id", id);
+		getMessage.put("origin", "D" + unitID);
 
 		// Send the getUnit message
 		try {
@@ -322,6 +328,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 
 		// Wait for the reply
 		while(!messageList.containsKey(id)) {
+			
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
@@ -346,6 +353,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		removeMessage.put("x", x);
 		removeMessage.put("y", y);
 		removeMessage.put("id", id);
+		removeMessage.put("origin", "D" + unitID);
 
 		// Send the removeUnit message
 		try {
@@ -365,6 +373,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		moveMessage.put("y", y);
 		moveMessage.put("id", id);
 		moveMessage.put("unit", this);
+		moveMessage.put("origin", "D" + unitID);
 
 		// Send the getUnit message
 		try {
