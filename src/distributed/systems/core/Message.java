@@ -2,6 +2,7 @@ package distributed.systems.core;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 public class Message implements Serializable {
 
@@ -39,6 +40,20 @@ public class Message implements Serializable {
 	 */
 	public void put(String string, Serializable object) {
 		messageContent.put(string, object);
+	}
+	
+	/**
+	 * Represent this Message as a String
+	 */
+	public String toString(){
+		String out = "Message(";
+		for (Entry<String, Serializable> kv : messageContent.entrySet()){
+			if ("Message(".equals(out))
+				out += kv.getKey() + " = " + kv.getValue();
+			else
+				out += ", " + kv.getKey() + " = " + kv.getValue();
+		}
+		return out + ")";
 	}
 
 }

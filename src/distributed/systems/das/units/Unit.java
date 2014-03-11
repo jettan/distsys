@@ -328,7 +328,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 
 		// Wait for the reply
 		while(!messageList.containsKey(id)) {
-			
+
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
