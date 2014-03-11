@@ -56,25 +56,10 @@ public class LocalSocket extends Socket implements Serializable {
 	@Override
 	public void sendMessage(Message reply, String origin)
 			throws IDNotAssignedException {
-		
-		try {
-			String [] names = java.rmi.Naming.list("rmi://localhost:1099");
-			System.out.println("Printing all names in the registry...");
-			System.out.println("=====================================");
-			for (String name : names) {
-				System.out.println(name);
-			}
-			System.out.println("================END==================");
-		} catch (Exception e) {
-			
-		}
-		
-		String rmiURL = "rmi://localhost:1099/" + getServerID(origin);
-		System.out.println("Looking up: " + rmiURL);
 		try {
 			
 			// Look up the serverid immediately instead of the url since the naming lookup works like this.
-			IMessageReceivedHandler remoteReceiver = (IMessageReceivedHandler) java.rmi.Naming.lookup(getServerID(origin)); // y u no work!?
+			IMessageReceivedHandler remoteReceiver = (IMessageReceivedHandler) java.rmi.Naming.lookup(getServerID(origin));
 			remoteReceiver.onMessageReceived(reply);
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			e.printStackTrace();
@@ -84,10 +69,8 @@ public class LocalSocket extends Socket implements Serializable {
 	@Override
 	public void addMessageReceivedHandler(IMessageReceivedHandler handler)  {
 		try {
-			System.out.println("Trying to bind serverid " + this.getId() + " to RMI registry.");
 			java.rmi.Naming.bind(this.getId(), handler);
 			handlers.add(handler);
-			System.out.println("Succesfully bound " + this.getId() + " to RMI registry.");
 		} catch (MalformedURLException | RemoteException
 				| AlreadyBoundException e) {
 			e.printStackTrace();

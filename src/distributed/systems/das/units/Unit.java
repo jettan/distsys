@@ -246,7 +246,6 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		spawnMessage.put("unit", this);
 		spawnMessage.put("id", id);
 
-		System.out.println("Trying to send spawn message...");
 		// Send a spawn message
 		try {
 			clientSocket.sendMessage(spawnMessage, "localsocket://" + BattleField.serverID);
@@ -407,7 +406,8 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 	 */
 	public void stopRunnerThread() {
 		try {
-			runnerThread.join();
+			if (runnerThread != null)
+				runnerThread.join();
 		} catch (InterruptedException ex) {
 			assert(false) : "Unit stopRunnerThread was interrupted";
 		}

@@ -209,7 +209,6 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	}
 
 	public void onMessageReceived(Message msg) {
-		System.out.println("Received message!");
 		Message reply = null;
 		String origin = (String)msg.get("origin");
 		MessageRequest request = (MessageRequest)msg.get("request");
@@ -218,7 +217,6 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		{
 			case spawnUnit:
 			{
-				System.out.println("Received message to spawn unit!");
 				this.spawnUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
 				break;
 			}
@@ -299,7 +297,6 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 
 		try {
 			if (reply != null && origin != null) {
-				System.out.println("Sending reply...");
 				serverSocket.sendMessage(reply, origin);
 			}
 		}

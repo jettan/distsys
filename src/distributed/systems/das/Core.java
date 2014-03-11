@@ -16,9 +16,9 @@ import distributed.systems.das.units.Player;
  * @author Pieter Anemaet, Boaz Pat-El
  */
 public class Core {
-	public static final int MIN_PLAYER_COUNT = 0;//30; TODO
-	public static final int MAX_PLAYER_COUNT = 0;//60;
-	public static final int DRAGON_COUNT = 1;//20;
+	public static final int MIN_PLAYER_COUNT = 30;
+	public static final int MAX_PLAYER_COUNT = 60;
+	public static final int DRAGON_COUNT = 20;
 	public static final int TIME_BETWEEN_PLAYER_LOGIN = 5000; // In milliseconds
 	
 	public static BattleField battlefield; 
@@ -163,10 +163,13 @@ public class Core {
 		 */
 		BattleField.getBattleField().shutdown();
 		
+		System.out.println("Sleeping for 2 seconds to allow all threads to finish.");
+		try { Thread.sleep(2000); } catch (InterruptedException e1) { }
+		
 		try {
 			java.rmi.server.UnicastRemoteObject.unexportObject(reg,true);
 		} catch (NoSuchObjectException e) {
-			e.printStackTrace();
+			// If it's already released, that's good
 		}
 		
 		System.exit(0); // Stop all running processes

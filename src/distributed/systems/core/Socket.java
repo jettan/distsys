@@ -81,7 +81,6 @@ public abstract class Socket {
 	 * @return The corresponding server id
 	 */
 	public String getServerID(String uri){
-		System.out.println("uri = " + uri);
 		return uri.substring(uri.lastIndexOf('/')+1, uri.length());
 	}
 	
