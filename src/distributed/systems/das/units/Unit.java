@@ -2,7 +2,6 @@ package distributed.systems.das.units;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -258,6 +257,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 			return false;
 		}
 		
+		System.out.println("Messagelist size: " + messageList.size());
 		// Wait for the unit to be placed
 		getUnit(x, y);
 		
@@ -329,7 +329,6 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		System.out.println("[D" + unitID + "] Start waiting! Current messageList size: " + messageList.size());
 		// Wait for the reply
 		while(!messageList.containsKey(id)) {
-
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
@@ -404,6 +403,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 	public void onMessageReceived(Message message) {
 		System.out.println("[D" + unitID + "] Received " + message);
 		messageList.put((Integer)message.get("id"), message);
+		System.out.println(getClass().getName());
 	}
 	
 	// Disconnects the unit from the battlefield by exiting its run-state

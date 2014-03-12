@@ -16,11 +16,11 @@ import distributed.systems.core.exception.IDNotAssignedException;
  * A localhost socket
  */
 public class LocalSocket extends Socket implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	private String id;
-	
+
 	public LocalSocket() throws RemoteException {
 		super();
 	}
@@ -42,7 +42,7 @@ public class LocalSocket extends Socket implements Serializable {
 	 */
 	@Override
 	public void unRegister() {
-		if (handler != null)
+		if (!handlers.containsKey(this.id))
 			try {
 				java.rmi.Naming.unbind(getId());
 			} catch (RemoteException | MalformedURLException
@@ -59,9 +59,20 @@ public class LocalSocket extends Socket implements Serializable {
 			throws IDNotAssignedException {
 		try {
 			System.out.println("[" + id + "] Sending " + reply);
-			// Look up the serverid immediately instead of the url since the naming lookup works like this.
-			IMessageReceivedHandler remoteReceiver = (IMessageReceivedHandler) java.rmi.Naming.lookup(getServerID(origin));
-			remoteReceiver.onMessageReceived(reply);
+			//System.out.println("handlerList size: " + handlers.size());
+
+			// Check whether we already have the handler for this client.
+			if (!handlers.containsKey(origin)) {
+				//System.out.println("Handler not found in list, looking up...");
+				// Look up the serverid immediately instead of the url since the naming lookup works like this.
+				IMessageReceivedHandler remoteReceiver = (IMessageReceivedHandler) java.rmi.Naming.lookup(getServerID(origin));
+				handlers.put(origin, remoteReceiver);
+				remoteReceiver.onMessageReceived(reply);
+			} else {
+				//System.out.println("Handler found in list, skipping lookup.");
+				handlers.get(origin).onMessageReceived(reply);
+			}
+			
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			e.printStackTrace();
 		}
@@ -73,7 +84,7 @@ public class LocalSocket extends Socket implements Serializable {
 			System.out.println("Trying to bind serverid " + this.id + " to RMI registry.");
 			java.rmi.Naming.bind(this.getId(), handler);
 			System.out.println("Succesfully bound " + this.id + " to RMI registry.");
-			this.handler = handler;
+			handlers.put(this.id, handler);
 		} catch (MalformedURLException | RemoteException
 				| AlreadyBoundException e) {
 			e.printStackTrace();

@@ -217,6 +217,8 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		{
 			case spawnUnit:
 			{
+				reply = new Message();
+				reply.put("id", msg.get("id"));
 				this.spawnUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
 				break;
 			}

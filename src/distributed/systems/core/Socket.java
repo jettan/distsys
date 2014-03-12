@@ -1,6 +1,7 @@
 package distributed.systems.core;
 
 import java.rmi.RemoteException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import distributed.systems.core.exception.AlreadyAssignedIDException;
@@ -11,7 +12,7 @@ public abstract class Socket {
 	/**
 	 * The registered handlers that can receive messages
 	 */
-	protected IMessageReceivedHandler handler;
+	protected Map<String, IMessageReceivedHandler> handlers;
 	
 	/**
 	 * All of the bound sockets
@@ -23,6 +24,7 @@ public abstract class Socket {
 	 * serverids
 	 */
 	public Socket() throws RemoteException{
+		handlers = new ConcurrentHashMap<String, IMessageReceivedHandler>();
 		registeredSockets = new ConcurrentHashMap<String, Socket>();
 	}
 	

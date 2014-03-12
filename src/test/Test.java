@@ -21,10 +21,9 @@ public class Test implements IMessageReceivedHandler, Serializable{
 		Registry reg = java.rmi.registry.LocateRegistry.createRegistry(1099);
 		
 		// SERVER code
-		Socket srv = new SynchronizedSocket(new LocalSocket());
-		srv.register("1234");
-		Handler srvHandler = new Handler(srv, "5678"); //Upon receipt of a message, send one back
-		srv.addMessageReceivedHandler(srvHandler);
+		//Socket srv = new SynchronizedSocket(new LocalSocket());
+		Handler srvHandler = new Handler("5678"); //Upon receipt of a message, send one back
+		//srv.addMessageReceivedHandler(srvHandler);
 		
 		// CLIENT code
 		Socket clt = new SynchronizedSocket(new LocalSocket());
@@ -37,7 +36,7 @@ public class Test implements IMessageReceivedHandler, Serializable{
 		
 		// shared
 		clt.unRegister();
-		srv.unRegister();
+		//srv.unRegister();
 	
 		// shared
 		java.rmi.server.UnicastRemoteObject.unexportObject(reg,true);
@@ -56,9 +55,18 @@ public class Test implements IMessageReceivedHandler, Serializable{
 		private Socket returner;
 		private String retId;
 		
-		public Handler(Socket srv, String origin){
-			this.returner = srv;
+		public Handler(String origin) throws AlreadyAssignedIDException{
+			try {
+				this.returner = new LocalSocket();
+				returner.register("1234");
+
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			this.retId = origin;
+			returner.addMessageReceivedHandler(this);
+			
 		}
 		
 		@Override
