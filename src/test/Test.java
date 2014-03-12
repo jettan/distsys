@@ -64,9 +64,17 @@ public class Test implements IMessageReceivedHandler, Serializable{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			this.retId = origin;
-			returner.addMessageReceivedHandler(this);
 			
+			IMessageReceivedHandler stub;
+			try {
+				stub = (IMessageReceivedHandler) java.rmi.server.UnicastRemoteObject.exportObject(this, 0);
+				returner.addMessageReceivedHandler(stub);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+			
+			
+			this.retId = origin;
 		}
 		
 		@Override
