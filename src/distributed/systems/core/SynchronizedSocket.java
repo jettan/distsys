@@ -1,8 +1,6 @@
 package distributed.systems.core;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
@@ -13,11 +11,10 @@ import distributed.systems.example.LocalSocket;
  */
 public class SynchronizedSocket extends Socket implements Serializable{
 
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private LocalSocket socket;
+	
 	private String id;
 	
 	public SynchronizedSocket() throws RemoteException{

@@ -1,8 +1,6 @@
 package distributed.systems.core;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 import distributed.systems.core.exception.AlreadyAssignedIDException;
@@ -13,7 +11,7 @@ public abstract class Socket {
 	/**
 	 * The registered handlers that can receive messages
 	 */
-	protected Collection<IMessageReceivedHandler> handlers;
+	protected IMessageReceivedHandler handler;
 	
 	/**
 	 * All of the bound sockets
@@ -25,7 +23,6 @@ public abstract class Socket {
 	 * serverids
 	 */
 	public Socket() throws RemoteException{
-		handlers = new ArrayList<IMessageReceivedHandler>();
 		registeredSockets = new ConcurrentHashMap<String, Socket>();
 	}
 	
@@ -57,12 +54,6 @@ public abstract class Socket {
 	 * @throws IDNotAssignedException If the serverid does not exist
 	 */
 	public abstract void sendMessage(Message reply, String origin) throws IDNotAssignedException;
-	
-	public void receiveMessage(Message reply) throws RemoteException{
-		for (IMessageReceivedHandler handler : handlers){
-			handler.onMessageReceived(reply);
-		}
-	}
 	
 	/**
 	 * Decompoase a uri into the uri protocol

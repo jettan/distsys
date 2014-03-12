@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 import distributed.systems.core.IMessageReceivedHandler;
@@ -17,6 +16,8 @@ import distributed.systems.core.exception.IDNotAssignedException;
  * A localhost socket
  */
 public class LocalSocket extends Socket implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private String id;
 	
@@ -41,7 +42,7 @@ public class LocalSocket extends Socket implements Serializable {
 	 */
 	@Override
 	public void unRegister() {
-		if (getId() != null)
+		if (handler != null)
 			try {
 				java.rmi.Naming.unbind(getId());
 			} catch (RemoteException | MalformedURLException
@@ -72,7 +73,7 @@ public class LocalSocket extends Socket implements Serializable {
 			System.out.println("Trying to bind serverid " + this.id + " to RMI registry.");
 			java.rmi.Naming.bind(this.getId(), handler);
 			System.out.println("Succesfully bound " + this.id + " to RMI registry.");
-			handlers.add(handler);
+			this.handler = handler;
 		} catch (MalformedURLException | RemoteException
 				| AlreadyBoundException e) {
 			e.printStackTrace();
