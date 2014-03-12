@@ -57,7 +57,7 @@ public class LocalSocket extends Socket implements Serializable {
 	public void sendMessage(Message reply, String origin)
 			throws IDNotAssignedException {
 		try {
-			
+			System.out.println("[" + id + "] Sending " + reply);
 			// Look up the serverid immediately instead of the url since the naming lookup works like this.
 			IMessageReceivedHandler remoteReceiver = (IMessageReceivedHandler) java.rmi.Naming.lookup(getServerID(origin));
 			remoteReceiver.onMessageReceived(reply);

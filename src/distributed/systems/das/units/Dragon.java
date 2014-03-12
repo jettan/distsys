@@ -52,6 +52,7 @@ public class Dragon extends Unit implements Runnable, Serializable {
 			System.err.println("Could not spawn dragon on location " + x + ", " + y + ".");
 			return; // We could not spawn on the battlefield
 		}
+		
 		/* Awaken the dragon */
 		runnerThread = new Thread(this);
 		runnerThread.start();

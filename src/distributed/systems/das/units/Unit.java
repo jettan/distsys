@@ -249,7 +249,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		spawnMessage.put("unit", this);
 		spawnMessage.put("id", id);
 		spawnMessage.put("origin", "D" + unitID);
-
+		
 		// Send a spawn message
 		try {
 			clientSocket.sendMessage(spawnMessage, "localsocket://" + BattleField.serverID);
@@ -278,7 +278,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		getMessage.put("y", y);
 		getMessage.put("id", id);
 		getMessage.put("origin", "D" + unitID);
-
+		
 		// Send the getUnit message
 		try {
 			clientSocket.sendMessage(getMessage, "localsocket://" + BattleField.serverID);
@@ -325,7 +325,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
+		System.out.println("[D" + unitID + "] Start waiting! Current messageList size: " + messageList.size());
 		// Wait for the reply
 		while(!messageList.containsKey(id)) {
 
@@ -338,7 +338,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 			if (!GameState.getRunningState())
 				return null;
 		}
-
+		System.out.println("[D" + unitID + "] Done waiting!");
 		result = messageList.get(id);
 		messageList.put(id, null);
 
@@ -401,6 +401,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 	}
 
 	public void onMessageReceived(Message message) {
+		System.out.println("[D" + unitID + "] Received " + message);
 		messageList.put((Integer)message.get("id"), message);
 	}
 	
