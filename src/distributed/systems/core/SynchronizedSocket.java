@@ -25,7 +25,7 @@ public class SynchronizedSocket extends Socket implements Serializable{
 	}
 
 	public SynchronizedSocket(Socket localSocket) throws RemoteException{
-		//super();
+		super();
 		socket = (LocalSocket) localSocket;
 	}
 
@@ -49,16 +49,6 @@ public class SynchronizedSocket extends Socket implements Serializable{
 
 	@Override
 	public void addMessageReceivedHandler(IMessageReceivedHandler handler) {
-		try {
-			this.id = socket.getId();
-			System.out.println("Trying to bind serverid " + this.id + " to RMI registry.");
-			java.rmi.Naming.bind(this.id, handler);
-			handlers.add(handler);
-			System.out.println("Succesfully bound " + this.id + " to RMI registry.");
-		} catch (MalformedURLException | RemoteException
-				| AlreadyBoundException e) {
-			e.printStackTrace();
-		}
-
+		socket.addMessageReceivedHandler(handler);
 	}
 }

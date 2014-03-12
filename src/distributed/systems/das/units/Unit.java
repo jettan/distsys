@@ -325,6 +325,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
 		System.out.println("[D" + unitID + "] Start waiting! Current messageList size: " + messageList.size());
 		// Wait for the reply
 		while(!messageList.containsKey(id)) {

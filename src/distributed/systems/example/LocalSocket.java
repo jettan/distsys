@@ -69,7 +69,9 @@ public class LocalSocket extends Socket implements Serializable {
 	@Override
 	public void addMessageReceivedHandler(IMessageReceivedHandler handler)  {
 		try {
+			System.out.println("Trying to bind serverid " + this.id + " to RMI registry.");
 			java.rmi.Naming.bind(this.getId(), handler);
+			System.out.println("Succesfully bound " + this.id + " to RMI registry.");
 			handlers.add(handler);
 		} catch (MalformedURLException | RemoteException
 				| AlreadyBoundException e) {
