@@ -6,6 +6,8 @@ import java.rmi.registry.Registry;
 
 import distributed.systems.core.IMessageReceivedHandler;
 import distributed.systems.core.Message;
+import distributed.systems.core.Socket;
+import distributed.systems.core.SynchronizedSocket;
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
 import distributed.systems.example.LocalSocket;
@@ -19,13 +21,13 @@ public class Test implements IMessageReceivedHandler, Serializable{
 		Registry reg = java.rmi.registry.LocateRegistry.createRegistry(1099);
 		
 		// SERVER code
-		LocalSocket srv = new LocalSocket();
+		Socket srv = new SynchronizedSocket(new LocalSocket());
 		srv.register("1234");
 		Handler srvHandler = new Handler(srv, "5678"); //Upon receipt of a message, send one back
 		srv.addMessageReceivedHandler(srvHandler);
 		
 		// CLIENT code
-		LocalSocket clt = new LocalSocket();
+		Socket clt = new SynchronizedSocket(new LocalSocket());
 		clt.register("5678");
 		clt.addMessageReceivedHandler(new Test());
 
@@ -51,11 +53,11 @@ public class Test implements IMessageReceivedHandler, Serializable{
 
 		private static final long serialVersionUID = 1L;
 		
-		private LocalSocket returner;
+		private Socket returner;
 		private String retId;
 		
-		public Handler(LocalSocket ret, String origin){
-			this.returner = ret;
+		public Handler(Socket srv, String origin){
+			this.returner = srv;
 			this.retId = origin;
 		}
 		
