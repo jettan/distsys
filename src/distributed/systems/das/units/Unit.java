@@ -99,7 +99,13 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 			System.err.println("Socket \"D" + unitID + "\" was already registered.");
 		}
 
-		clientSocket.addMessageReceivedHandler(this);
+		IMessageReceivedHandler stub;
+		try {
+			stub = (IMessageReceivedHandler) java.rmi.server.UnicastRemoteObject.exportObject(this, 0);
+			clientSocket.addMessageReceivedHandler(stub);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
