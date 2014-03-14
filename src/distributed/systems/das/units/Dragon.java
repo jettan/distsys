@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
+import distributed.systems.das.units.Unit.UnitType;
 
 /**
  * A dragon is a non-playing character, which can't
@@ -52,6 +53,8 @@ public class Dragon extends Unit implements Runnable, Serializable {
 			System.err.println("Could not spawn dragon on location " + x + ", " + y + ".");
 			return; // We could not spawn on the battlefield
 		}
+		
+		myType = UnitType.dragon;
 		
 		/* Awaken the dragon */
 		runnerThread = new Thread(this);

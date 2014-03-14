@@ -62,8 +62,10 @@ public abstract class Unit implements UnitRef {
 	};
 	
 	public enum UnitType {
-		player, dragon, undefined,
+		player, dragon, undefined
 	};
+	
+	protected UnitType myType = UnitType.undefined;
 
 	/**
 	 * Create a new unit and specify the 
@@ -233,6 +235,13 @@ public abstract class Unit implements UnitRef {
 	public int getAttackPoints() {
 		return attackPoints;
 	}
+	
+	/**
+	 * @return our unit type
+	 */
+	public UnitType getMyType() throws RemoteException{
+		return myType;
+	}
 
 	/**
 	 * Tries to make the unit spawn at a certain location on the battlefield
@@ -309,8 +318,8 @@ public abstract class Unit implements UnitRef {
 		if (result == null) // Could happen if the game window had closed
 			return UnitType.undefined;
 		messageList.remove(id);
-		
-		return (UnitType) result.get("type");	
+		System.out.println("RETURNING TYPE " + result.get("type") + " : " + UnitType.values()[(Integer)result.get("type")]);
+		return UnitType.values()[(Integer)result.get("type")];	
 		
 	}
 

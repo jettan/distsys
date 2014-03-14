@@ -17,6 +17,7 @@ import distributed.systems.das.units.Dragon;
 import distributed.systems.das.units.Player;
 import distributed.systems.das.units.Unit;
 import distributed.systems.das.units.UnitRef;
+import distributed.systems.das.units.Unit.UnitType;
 
 /**
  * Create an viewer, which runs in a seperate thread and
@@ -92,10 +93,15 @@ public class BattleFieldViewer extends JPanel implements Runnable {
 				u = bf.getUnit(i, j);
 				if (u == null) continue; // Nothing to draw in this sector
 
-				if (u instanceof Dragon)
-					doubleBufferGraphics.setColor(Color.RED);
-				else if (u instanceof Player)
-					doubleBufferGraphics.setColor(Color.BLUE);
+				try {
+					if (u.getMyType() == UnitType.dragon)
+						doubleBufferGraphics.setColor(Color.RED);
+					else if (u.getMyType() == UnitType.player)
+						doubleBufferGraphics.setColor(Color.BLUE);
+				} catch (RemoteException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
 				/* Fill the unit color */
 				doubleBufferGraphics.fillRect((int)x + 1, (int)y + 1, (int)xRatio - 1, (int)yRatio - 1);

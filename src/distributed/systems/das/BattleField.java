@@ -282,11 +282,17 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				 * what message the battlefield responded to. 
 				 */
 				reply.put("id", msg.get("id"));
-				if (getUnit(x, y) instanceof Player)
-					reply.put("type", UnitType.player);
-				else if (getUnit(x, y) instanceof Dragon)
-					reply.put("type", UnitType.dragon);
-				else reply.put("type", UnitType.undefined);
+				try {
+					UnitRef unt = getUnit(x, y);
+					if (unt != null){
+						UnitType ret = unt.getMyType();
+						reply.put("type", ret.ordinal());
+					} else
+						reply.put("type", UnitType.undefined.ordinal());
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				break;
 			}
 			case dealDamage:

@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 
 import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
+import distributed.systems.das.units.Unit.UnitType;
 
 /**
  * A Player is, as the name implies, a playing 
@@ -47,6 +48,8 @@ public class Player extends Unit implements Runnable, Serializable {
 		if (!spawn(x, y))
 			return; // We could not spawn on the battlefield
 
+		myType = UnitType.player;
+		
 		/* Create a new player thread */
 		runnerThread = new Thread(this);
 		runnerThread.start();

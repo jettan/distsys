@@ -5,6 +5,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 import distributed.systems.core.IMessageReceivedHandler;
+import distributed.systems.das.units.Unit.UnitType;
 
 public interface UnitRef extends Remote, Serializable, IMessageReceivedHandler{
 
@@ -27,6 +28,8 @@ public interface UnitRef extends Remote, Serializable, IMessageReceivedHandler{
 	public int getHitPoints() throws RemoteException;
 
 	public int getAttackPoints() throws RemoteException;
+	
+	public UnitType getMyType() throws RemoteException;
 
 	public void disconnect() throws RemoteException;
 
