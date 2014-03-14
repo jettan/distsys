@@ -24,7 +24,7 @@ import distributed.systems.example.LocalSocket;
  *  
  * @author Pieter Anemaet, Boaz Pat-El
  */
-public abstract class Unit implements Serializable, IMessageReceivedHandler {
+public abstract class Unit implements UnitRef {
 	private static final long serialVersionUID = -4550572524008491160L;
 
 	// Position of the unit
@@ -251,7 +251,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		spawnMessage.put("request", MessageRequest.spawnUnit);
 		spawnMessage.put("x", x);
 		spawnMessage.put("y", y);
-		spawnMessage.put("unit", this);
+		spawnMessage.put("unit", (UnitRef) this);
 		spawnMessage.put("id", id);
 		spawnMessage.put("origin", "D" + unitID);
 		
@@ -308,13 +308,13 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		result = messageList.get(id);
 		if (result == null) // Could happen if the game window had closed
 			return UnitType.undefined;
-		messageList.put(id, null);
+		messageList.remove(id);
 		
 		return (UnitType) result.get("type");	
 		
 	}
 
-	protected Unit getUnit(int x, int y)
+	protected UnitRef getUnit(int x, int y)
 	{
 		Message getMessage = new Message(), result;
 		int id = localMessageCounter++;
@@ -346,9 +346,9 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		}
 		System.out.println("[D" + unitID + "] Done waiting!");
 		result = messageList.get(id);
-		messageList.put(id, null);
+		messageList.remove(id);
 
-		return (Unit) result.get("unit");	
+		return (UnitRef) result.get("unit");	
 	}
 
 	protected void removeUnit(int x, int y)
@@ -378,7 +378,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		moveMessage.put("x", x);
 		moveMessage.put("y", y);
 		moveMessage.put("id", id);
-		moveMessage.put("unit", this);
+		moveMessage.put("unit", (UnitRef) this);
 		moveMessage.put("origin", "D" + unitID);
 
 		// Send the getUnit message
@@ -403,7 +403,7 @@ public abstract class Unit implements Serializable, IMessageReceivedHandler {
 		}
 
 		// Remove the result from the messageList
-		messageList.put(id, null);
+		messageList.remove(id);
 	}
 
 	public void onMessageReceived(Message message) {

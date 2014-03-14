@@ -8,6 +8,7 @@ import distributed.systems.das.units.Dragon;
 import distributed.systems.das.units.Player;
 import distributed.systems.das.units.Unit;
 import distributed.systems.das.units.Unit.UnitType;
+import distributed.systems.das.units.UnitRef;
 import distributed.systems.core.IMessageReceivedHandler;
 import distributed.systems.core.Message;
 import distributed.systems.core.Socket;
@@ -33,7 +34,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	private static final long serialVersionUID = 1L;
 
 	/* The array of units */
-	private Unit[][] map;
+	private UnitRef[][] map;
 
 	/* The static singleton */
 	private static BattleField battlefield;
@@ -49,7 +50,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	public final static String serverID = "server";
 	public final static int MAP_WIDTH = 25;
 	public final static int MAP_HEIGHT = 25;
-	private ArrayList <Unit> units; 
+	private ArrayList <UnitRef> units; 
 
 	/**
 	 * Initialize the battlefield to the specified size 
@@ -61,12 +62,12 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		LocalSocket local = new LocalSocket();
 		
 		synchronized (this) {
-			map = new Unit[width][height];
+			map = new UnitRef[width][height];
 			
 			local.register(BattleField.serverID);
 			serverSocket = new SynchronizedSocket(local);
 			serverSocket.addMessageReceivedHandler(this);
-			units = new ArrayList<Unit>();
+			units = new ArrayList<UnitRef>();
 		}
 		
 	}
@@ -102,14 +103,19 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * @return true when the unit has been put on the 
 	 * specified position.
 	 */
-	private boolean spawnUnit(Unit unit, int x, int y)
+	private boolean spawnUnit(UnitRef unit, int x, int y)
 	{
 		synchronized (this) {
 			if (map[x][y] != null)
 				return false;
 	
 			map[x][y] = unit;
-			unit.setPosition(x, y);
+			try {
+				unit.setPosition(x, y);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		units.add(unit);
 
@@ -128,13 +134,18 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * @return true when the unit has been put on the 
 	 * specified position.
 	 */
-	private synchronized boolean putUnit(Unit unit, int x, int y)
+	private synchronized boolean putUnit(UnitRef unit, int x, int y)
 	{
 		if (map[x][y] != null)
 			return false;
 
 		map[x][y] = unit;
-		unit.setPosition(x, y);
+		try {
+			unit.setPosition(x, y);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return true;
 	}
@@ -147,7 +158,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * @return the unit at the specified position, or return
 	 * null if there is no unit at that specific position.
 	 */
-	public Unit getUnit(int x, int y)
+	public UnitRef getUnit(int x, int y)
 	{
 		assert x >= 0 && x < map.length;
 		assert y >= 0 && x < map[0].length;
@@ -164,13 +175,30 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * 
 	 * @return true on success.
 	 */
-	private synchronized boolean moveUnit(Unit unit, int newX, int newY)
+	private synchronized boolean moveUnit(UnitRef unit, int newX, int newY)
 	{
-		int originalX = unit.getX();
-		int originalY = unit.getY();
+		int originalX = -1;
+		try {
+			originalX = unit.getX();
+		} catch (RemoteException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		int originalY = -1;
+		try {
+			originalY = unit.getY();
+		} catch (RemoteException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
-		if (unit.getHitPoints() <= 0)
-			return false;
+		try {
+			if (unit.getHitPoints() <= 0)
+				return false;
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		if (newX >= 0 && newX < BattleField.MAP_WIDTH)
 			if (newY >= 0 && newY < BattleField.MAP_HEIGHT)
@@ -192,11 +220,16 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 */
 	private synchronized void removeUnit(int x, int y)
 	{
-		Unit unitToRemove = this.getUnit(x, y);
+		UnitRef unitToRemove = this.getUnit(x, y);
 		if (unitToRemove == null)
 			return; // There was no unit here to remove
 		map[x][y] = null;
-		unitToRemove.disconnect();
+		try {
+			unitToRemove.disconnect();
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		units.remove(unitToRemove);
 	}
 
@@ -212,19 +245,19 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		Message reply = null;
 		String origin = (String)msg.get("origin");
 		MessageRequest request = (MessageRequest)msg.get("request");
-		Unit unit;
+		UnitRef unit;
 		switch(request)
 		{
 			case spawnUnit:
 			{
 				reply = new Message();
 				reply.put("id", msg.get("id"));
-				this.spawnUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
+				this.spawnUnit((UnitRef)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
 				break;
 			}
 			case putUnit:
 			{
-				this.putUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
+				this.putUnit((UnitRef)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
 				break;
 			}
 			case getUnit:
@@ -262,7 +295,12 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				int y = (Integer)msg.get("y");
 				unit = this.getUnit(x, y);
 				if (unit != null)
-					unit.adjustHitPoints( -(Integer)msg.get("damage") );
+					try {
+						unit.adjustHitPoints( -(Integer)msg.get("damage") );
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				/* Copy the id of the message so that the unit knows 
 				 * what message the battlefield responded to. 
 				 */
@@ -274,7 +312,12 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				int y = (Integer)msg.get("y");
 				unit = this.getUnit(x, y);
 				if (unit != null)
-					unit.adjustHitPoints( (Integer)msg.get("healed") );
+					try {
+						unit.adjustHitPoints( (Integer)msg.get("healed") );
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				/* Copy the id of the message so that the unit knows 
 				 * what message the battlefield responded to. 
 				 */
@@ -283,7 +326,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 			case moveUnit:
 			{
 				reply = new Message();
-				this.moveUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
+				this.moveUnit((UnitRef)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
 				/* Copy the id of the message so that the unit knows 
 				 * what message the battlefield responded to. 
 				 */
@@ -314,9 +357,19 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 */ 
 	public synchronized void shutdown() {
 		// Remove all units from the battlefield and make them disconnect from the server
-		for (Unit unit : units) {
-			unit.disconnect();
-			unit.stopRunnerThread();
+		for (UnitRef unit : units) {
+			try {
+				unit.disconnect();
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				unit.stopRunnerThread();
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		serverSocket.unRegister();

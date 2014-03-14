@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.rmi.RemoteException;
 
 import javax.swing.JPanel;
 
@@ -15,6 +16,7 @@ import distributed.systems.das.GameState;
 import distributed.systems.das.units.Dragon;
 import distributed.systems.das.units.Player;
 import distributed.systems.das.units.Unit;
+import distributed.systems.das.units.UnitRef;
 
 /**
  * Create an viewer, which runs in a seperate thread and
@@ -65,11 +67,11 @@ public class BattleFieldViewer extends JPanel implements Runnable {
 	 * for dragons and a blue one for players. 
 	 */
 	public void paint(Graphics g) {
-		Unit u;
+		UnitRef u;
 		double x = 0, y = 0;
 		double xRatio = (double)this.getWidth() / (double)BattleField.MAP_WIDTH;
 		double yRatio = (double)this.getHeight() / (double)BattleField.MAP_HEIGHT;
-		double filler;
+		double filler = 0;
 		BattleField bf = BattleField.getBattleField();
 
 		/* Possibly adjust the double buffer */
@@ -100,12 +102,22 @@ public class BattleFieldViewer extends JPanel implements Runnable {
 
 				/* Draw healthbar */
 				doubleBufferGraphics.setColor(Color.GREEN);
-				filler = (double)yRatio * u.getHitPoints() / (double)u.getMaxHitPoints();
+				try {
+					filler = (double)yRatio * u.getHitPoints() / (double)u.getMaxHitPoints();
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				doubleBufferGraphics.fillRect((int)(x + 0.75 * xRatio), (int)(y + 1 + yRatio - filler), (int)xRatio / 4, (int)(filler));
 
 				/* Draw the identifier */
 				doubleBufferGraphics.setColor(Color.WHITE);
-				doubleBufferGraphics.drawString("" + u.getUnitID(), (int)x, (int)y + 15);
+				try {
+					doubleBufferGraphics.drawString("" + u.getUnitID(), (int)x, (int)y + 15);
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				doubleBufferGraphics.setColor(Color.BLACK);
 
 				/* Draw a rectangle around the unit */
