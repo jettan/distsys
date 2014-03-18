@@ -6,7 +6,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 
 /**
  * A Class that keeps track of an RMI endpoint
@@ -65,7 +64,7 @@ public class EndPoint {
 	}
 	
 	public Remote connect() throws MalformedURLException, RemoteException, NotBoundException{
-		return Naming.lookup(registry);
+		return Naming.lookup(getURI());
 	}
 
 }
