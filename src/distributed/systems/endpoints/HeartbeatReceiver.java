@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.RemoteServer;
+import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 
 /**
@@ -30,6 +32,8 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	
 	private final transient EndPoint endpoint;
 	
+	private transient String remoteHost = null;
+	
 	/**
 	 * Bind ourselves to an endpoint
 	 * 
@@ -55,6 +59,11 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 		
 		if (payload != null)
 			receivePayload(payload);
+		
+		try {
+			remoteHost = RemoteServer.getClientHost();
+		} catch (ServerNotActiveException e1) {
+		}
 		
 		byte nextid = (byte) ((id+1)%256);
 		final HeartbeatReceiver me = this;
@@ -83,6 +92,20 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 		try {
 			endpoint.close();
 		} catch (MalformedURLException e) {
+		}
+	}
+	
+	/**
+	 * Get the EndPoint for the machine sending us heartbeats
+	 * 
+	 * @return The endpoint for the remote host
+	 * @throws MalformedURLException
+	 */
+	public EndPoint getRemoteHost() throws MalformedURLException{
+		if (remoteHost == null){
+			return null;
+		} else {
+			return RMINamingURLParser.fromURL(remoteHost);
 		}
 	}
 
