@@ -31,8 +31,14 @@ public class TestHeartbeats {
 		HeartbeatSender hbs = new HeartbeatSender(clt);
 		
 		System.out.println("RUNNING TEST FOR 5 SECONDS");
+		System.out.println("EXPECTING DELIVERY OF 2 MESSAGES:");
+		
+		hbs.setPayload("Message (1/2)");
+		
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(2500);
+			hbs.setPayload("Message (2/2)");
+			Thread.sleep(2500);
 		} catch (InterruptedException e) {
 		} 
 		System.out.println("TEST FINISHED");

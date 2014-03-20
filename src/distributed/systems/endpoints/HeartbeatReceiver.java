@@ -1,5 +1,6 @@
 package distributed.systems.endpoints;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
@@ -48,9 +49,12 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void receiveHeartbeat(byte id) throws RemoteException {
+	public void receiveHeartbeat(byte id, Serializable payload) throws RemoteException {
 		if (currentWaiter != null)
 			currentWaiter.receive(id);
+		
+		if (payload != null)
+			receivePayload(payload);
 		
 		byte nextid = (byte) ((id+1)%256);
 		final HeartbeatReceiver me = this;
@@ -89,6 +93,15 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	 */
 	public void missedBeat(long id){
 		System.out.println("Did not receive " + id + " in time!");
+	}
+	
+	/**
+	 * Called if a payload was piggybacked onto a heartbeat
+	 * 
+	 * @param payload The delivered payload
+	 */
+	public void receivePayload(Serializable payload){
+		System.out.println("Received payload: " + payload);
 	}
 	
 	/**

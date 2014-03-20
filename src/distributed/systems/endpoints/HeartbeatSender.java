@@ -1,5 +1,6 @@
 package distributed.systems.endpoints;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -11,6 +12,8 @@ public class HeartbeatSender implements Runnable{
 	private final IHeartbeatReceiver rmInterface;
 	
 	private boolean alive = true;
+	
+	private Serializable payload;
 	
 	public HeartbeatSender(EndPoint remote) throws MalformedURLException, RemoteException, NotBoundException{
 		rmInterface = (IHeartbeatReceiver) remote.connect();
@@ -27,13 +30,34 @@ public class HeartbeatSender implements Runnable{
 	public void missedBeat(long id){
 		System.out.println("Failed to send heartbeat " + id);
 	}
+	
+	public void setPayload(Serializable payload){
+		if (this.payload != null){
+			synchronized(this.payload){
+				this.payload = payload;
+			}
+		} else {
+			this.payload = payload;
+		}
+	}
+	
+	public boolean isPayloadDelivered(){
+		return payload == null;
+	}
 
 	@Override
 	public void run() {
 		int id = 0;
 		while (alive){
 			try {
-				rmInterface.receiveHeartbeat((byte) id);
+				if (payload != null){
+					synchronized(payload){
+						rmInterface.receiveHeartbeat((byte) id, payload);
+						payload = null;
+					}
+				} else {
+					rmInterface.receiveHeartbeat((byte) id, null);
+				}
 			} catch (RemoteException e) {
 				missedBeat(id);
 			}
