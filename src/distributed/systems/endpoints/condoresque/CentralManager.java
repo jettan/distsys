@@ -10,12 +10,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import distributed.systems.endpoints.EndPoint;
 
+//TODO: Bind the central manager to the rmi registry.
+
 /**
  * This is an actual Central Manager implementation that runs on the Central Manager
  */
 public class CentralManager implements ICentralManager{
 
 	private static final long serialVersionUID = 1L;
+
+	public static String serverID = "centralmanager";
 	
 	private transient List<ReferenceExecutionMachine> machines = new CopyOnWriteArrayList<ReferenceExecutionMachine>(); 
 	
