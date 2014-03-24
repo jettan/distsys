@@ -16,6 +16,7 @@ public interface IHeartbeatReceiver extends Remote, Serializable {
 	
 	/**
 	 * Signal that no further heartbeats will be sent
+	 * Should only be called through RMI from a HeartbeatSender
 	 * 
 	 * @throws RemoteException If the message could not be sent 
 	 */
