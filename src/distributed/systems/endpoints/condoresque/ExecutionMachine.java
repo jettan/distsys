@@ -60,7 +60,9 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	 */
 	public EndPoint addClient(boolean main) throws RemoteException{
 		ReferenceClient out = null;
-		String localname = (main?"":"b") + endpoint.getRegistryName() + "_REFCLIENT_" + clients.size();
+		String localname = endpoint.getRegistryName() + "_REFCLIENT_" + clients.size();
+		if (!main)
+			localname = endpoint.getRegistryName() + "_REFCLIENT_b" + backupclients.size();
 		System.out.println("BINDING REFERENCE CLIENT TO " + localname);
 		if (main)
 			out = addClientToList(clients, localname);
