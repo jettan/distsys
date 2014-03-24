@@ -40,8 +40,8 @@ public class ReferenceExecutionMachine extends HeartbeatReceiver implements Comp
 
 	@Override
 	public void receivePayload(Serializable payload) {
-		if (payload instanceof Long){
-			latestClientCount = (Long) payload;
+		if (payload instanceof Integer){
+			latestClientCount = (Integer) payload;
 		} else {
 			System.err.println("Unknown payload received in heartbeat, ignoring");
 		}

@@ -45,8 +45,8 @@ public class Allocation implements Serializable, IHeartbeatMonitor {
 		EndPoint mep = mainmachine.addClient(true);
 		EndPoint bep = backupmachine.addClient(false);
 		
-		mainHB = new HeartbeatSender(new EndPoint(main.getHostName(), main.getPort(), mep.getRegistryName()), this);
-		backupHB = new HeartbeatSender(new EndPoint(backup.getHostName(), backup.getPort(), bep.getRegistryName()), this);
+		mainHB = new HeartbeatSender(null, new EndPoint(main.getHostName(), main.getPort(), mep.getRegistryName()), this);
+		backupHB = new HeartbeatSender(null, new EndPoint(backup.getHostName(), backup.getPort(), bep.getRegistryName()), this);
 	}
 
 	public void stopHeartbeats() throws RemoteException{

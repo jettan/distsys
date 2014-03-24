@@ -1,5 +1,6 @@
 package distributed.systems.endpoints;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.Naming;
@@ -10,8 +11,10 @@ import java.rmi.RemoteException;
 /**
  * A Class that keeps track of an RMI endpoint
  */
-public class EndPoint {
+public class EndPoint implements Serializable{
 
+	private static final long serialVersionUID = 1L;
+	
 	private final String host;
 	private final int port;
 	private final String registry;
@@ -64,6 +67,7 @@ public class EndPoint {
 	}
 	
 	public Remote connect() throws MalformedURLException, RemoteException, NotBoundException{
+		System.out.println("CONNECTING ENDPOINT TO " + getURI());
 		return Naming.lookup(getURI());
 	}
 	

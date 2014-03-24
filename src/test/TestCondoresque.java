@@ -48,6 +48,12 @@ public class TestCondoresque {
 		for (int i = 0; i < eMachineAmount; i++)
 			eMachines.add(new ExecutionMachine(centralManagerEP, execMachinesEPs.get(i)));
 		
+		System.out.println("SERVER SETUP FINISHED, STARTING SLEEP");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+		} 
+		
 		/**
 		 * Bind every client
 		 * (Normally done on multiple different devices)
@@ -58,9 +64,13 @@ public class TestCondoresque {
 			if (!client.connect())
 				System.err.println("ALLOCATION FAILED FOR CLIENT " + i);
 			clients.add(client);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+			} 
 		}
 		
-		System.out.println("SETUP FINISHED, STARTING SLEEP");
+		System.out.println("CLIENT SETUP FINISHED, STARTING SLEEP");
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -68,7 +78,9 @@ public class TestCondoresque {
 		
 		System.out.println("SHUTTING DOWN");
 		for (int i = 0; i < clientAmount; i++)
-			clients.get(i).disconnect();
+			try{
+				clients.get(i).disconnect();
+			} catch (Exception e){}
 		
 		tearDown();
 	}

@@ -40,7 +40,11 @@ public class CentralManager implements ICentralManager{
 		synchronized(machines){
 			Collections.sort(machines);
 			try {
-				allocation = new Allocation(machines.get(0).getRemoteHost(), machines.get(1).getRemoteHost());
+				EndPoint main = machines.get(0).getRemoteHost();
+				EndPoint backup = machines.get(1).getRemoteHost();
+				System.out.println("Allocated main: " + main.getURI());
+				System.out.println("Allocated backup: " + backup.getURI());
+				allocation = new Allocation(main, backup);
 			} catch (Exception e) {
 				//Failed to allocate
 				// - Not enough machines

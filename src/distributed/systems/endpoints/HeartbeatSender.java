@@ -9,6 +9,8 @@ public class HeartbeatSender implements Runnable{
 
 	private final static long BEAT_TIME = 100;
 
+	private final EndPoint local;
+	
 	private EndPoint remote;
 	private IHeartbeatReceiver rmInterface;
 	
@@ -19,22 +21,25 @@ public class HeartbeatSender implements Runnable{
 	private IHeartbeatMonitor monitor;
 	
 	/**
-	 * Construct a new HeartBeat sender without an endpoint
+	 * Construct a new HeartBeat sender without an endpoint.
+	 * Use the local EndPoint for responses.
 	 */
-	public HeartbeatSender(){
-		
+	public HeartbeatSender(EndPoint local){
+		this.local = local;
 	}
 	
 	/**
 	 * Construct a new HeartbeatSender and immediately start the heartbeat:
 	 * same as calling connect() after construction.
+	 * Use the local EndPoint for responses.
 	 * 
 	 * @param remote
 	 * @throws MalformedURLException
 	 * @throws RemoteException
 	 * @throws NotBoundException
 	 */
-	public HeartbeatSender(EndPoint remote) throws MalformedURLException, RemoteException, NotBoundException{
+	public HeartbeatSender(EndPoint local, EndPoint remote) throws MalformedURLException, RemoteException, NotBoundException{
+		this.local = local;
 		connect(remote);
 	}
 	
@@ -48,7 +53,8 @@ public class HeartbeatSender implements Runnable{
 	 * @throws RemoteException
 	 * @throws NotBoundException
 	 */
-	public HeartbeatSender(EndPoint remote, IHeartbeatMonitor monitor) throws MalformedURLException, RemoteException, NotBoundException{
+	public HeartbeatSender(EndPoint local, EndPoint remote, IHeartbeatMonitor monitor) throws MalformedURLException, RemoteException, NotBoundException{
+		this.local = local;
 		setMonitor(monitor);
 		connect(remote);
 	}
@@ -134,11 +140,11 @@ public class HeartbeatSender implements Runnable{
 			try {
 				if (payload != null){
 					synchronized(payload){
-						rmInterface.receiveHeartbeat((byte) id, payload);
+						rmInterface.receiveHeartbeat(local, (byte) id, payload);
 						payload = null;
 					}
 				} else {
-					rmInterface.receiveHeartbeat((byte) id, null);
+					rmInterface.receiveHeartbeat(local, (byte) id, null);
 				}
 			} catch (RemoteException e) {
 				missedBeat(id);

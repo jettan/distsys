@@ -12,7 +12,7 @@ public interface IHeartbeatReceiver extends Remote, Serializable {
 	 * @param id The sequence number
 	 * @throws RemoteException If the message could not be sent
 	 */
-	public void receiveHeartbeat(byte id, Serializable payload) throws RemoteException;
+	public void receiveHeartbeat(EndPoint sender, byte id, Serializable payload) throws RemoteException;
 	
 	/**
 	 * Signal that no further heartbeats will be sent

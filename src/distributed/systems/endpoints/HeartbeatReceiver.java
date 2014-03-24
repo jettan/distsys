@@ -32,7 +32,7 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	
 	private final transient EndPoint endpoint;
 	
-	private transient String remoteHost = null;
+	private transient EndPoint remoteHost = null;
 	
 	private IHeartbeatMonitor monitor;
 	
@@ -61,7 +61,7 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void receiveHeartbeat(byte id, Serializable payload) throws RemoteException {
+	public void receiveHeartbeat(EndPoint sender, byte id, Serializable payload) throws RemoteException {
 		if (currentWaiter != null)
 			currentWaiter.receive(id);
 		
@@ -69,7 +69,8 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 			receivePayload(payload);
 		
 		try {
-			remoteHost = RemoteServer.getClientHost();
+			if (sender != null)
+				remoteHost = new EndPoint(RemoteServer.getClientHost(), sender.getPort(), sender.getRegistryName());
 		} catch (ServerNotActiveException e1) {
 		}
 		
@@ -107,14 +108,9 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	 * Get the EndPoint for the machine sending us heartbeats
 	 * 
 	 * @return The endpoint for the remote host
-	 * @throws MalformedURLException
 	 */
-	public EndPoint getRemoteHost() throws MalformedURLException{
-		if (remoteHost == null){
-			return null;
-		} else {
-			return RMINamingURLParser.fromURL(remoteHost);
-		}
+	public EndPoint getRemoteHost(){
+		return remoteHost;
 	}
 
 	/**
@@ -122,11 +118,7 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	 */
 	public void missedBeat(long id){
 		if (monitor != null)
-			try {
-				monitor.missedBeat(getRemoteHost());
-			} catch (MalformedURLException e) {
-				monitor.missedBeat(null);
-			}
+			monitor.missedBeat(getRemoteHost());
 	}
 	
 	/**

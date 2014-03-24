@@ -41,6 +41,7 @@ public class Client implements IHeartbeatMonitor{
 			
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			// Panic! Central manager not available.
+			e.printStackTrace();
 			return false;
 		}
 		return false;

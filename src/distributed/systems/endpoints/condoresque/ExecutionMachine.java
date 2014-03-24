@@ -42,7 +42,7 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	public ExecutionMachine(EndPoint centralManager, EndPoint local) throws MalformedURLException,
 			RemoteException, NotBoundException, InstantiationException, AlreadyBoundException {
 		// We have to construct our super on the first line, so yeah
-		super(new EndPoint(centralManager.getHostName(), centralManager.getPort(), "REFEXMACHINE_" + ((ICentralManager) centralManager.connect()).requestMachineID()));
+		super(local, new EndPoint(centralManager.getHostName(), centralManager.getPort(), "REFEXMACHINE_" + ((ICentralManager) centralManager.connect()).requestMachineID()));
 		
 		endpoint = local;
 		endpoint.open((IExecutionMachine) UnicastRemoteObject.exportObject(this, 0));
@@ -60,12 +60,14 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	 */
 	public EndPoint addClient(boolean main) throws RemoteException{
 		ReferenceClient out = null;
-		String localname = "REFCLIENT_" + clients.size();
+		String localname = (main?"":"b") + endpoint.getRegistryName() + "_REFCLIENT_" + clients.size();
+		System.out.println("BINDING REFERENCE CLIENT TO " + localname);
 		if (main)
 			out = addClientToList(clients, localname);
 		else
 			out = addClientToList(backupclients, localname);
-		setPayload(clients.size());
+		System.out.println("SENDING OVER NEW CLIENT SIZE: " + (clients.size()+backupclients.size()));
+		setPayload(clients.size()+backupclients.size());
 		if (out != null)
 			return new EndPoint(localname);
 		else
@@ -80,11 +82,8 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 		try {
 			list.add(new ReferenceClient(new EndPoint(regname), this));
 			out = list.get(list.size()-1);
-		} catch (MalformedURLException e) {
-			throw new RemoteException();
-		} catch (InstantiationException e) {
-			throw new RemoteException();
-		} catch (AlreadyBoundException e) {
+		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RemoteException();
 		}
 		return out;
@@ -98,7 +97,7 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	 */
 	public void removeClient(EndPoint client){
 		clients.remove(client);	// If this doesn't remove anything, clients.size() will still be correct!
-		setPayload(clients.size());
+		setPayload(clients.size()+backupclients.size());
 	}
 	
 	/**
