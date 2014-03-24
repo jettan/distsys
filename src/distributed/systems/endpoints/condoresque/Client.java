@@ -48,7 +48,8 @@ public class Client implements IHeartbeatMonitor{
 	
 	public boolean disconnect(){
 		try {
-			allocation.stopHeartbeats();
+			if (allocation != null)
+				allocation.stopHeartbeats();
 		} catch (RemoteException e) {
 			return false;
 		}

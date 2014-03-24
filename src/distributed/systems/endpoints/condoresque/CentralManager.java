@@ -3,14 +3,14 @@ package distributed.systems.endpoints.condoresque;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import distributed.systems.endpoints.EndPoint;
 
-//TODO: Bind the central manager to the rmi registry.
 
 /**
  * This is an actual Central Manager implementation that runs on the Central Manager
@@ -21,10 +21,14 @@ public class CentralManager implements ICentralManager{
 
 	public static String serverID = "centralmanager";
 	
-	private transient List<ReferenceExecutionMachine> machines = new CopyOnWriteArrayList<ReferenceExecutionMachine>(); 
+	private transient List<ReferenceExecutionMachine> machines = new ArrayList<ReferenceExecutionMachine>(); 
 	
 	private transient AtomicInteger lastid = new AtomicInteger(-1);
 
+	public CentralManager(EndPoint local) throws MalformedURLException, RemoteException, InstantiationException, AlreadyBoundException{
+		local.open((ICentralManager) UnicastRemoteObject.exportObject(this, 0));
+	}
+	
 	/**
 	 * Called by a client to retrieve a server allocation (main + backup)
 	 */
