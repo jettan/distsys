@@ -4,26 +4,31 @@ import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.server.RemoteServer;
-import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import distributed.systems.endpoints.EndPoint;
 import distributed.systems.endpoints.HeartbeatSender;
-import distributed.systems.endpoints.RMINamingURLParser;
+import distributed.systems.endpoints.IHeartbeatMonitor;
 
 /**
  * This is an actual Execution Machine implementation that runs on an Execution Machine
  * 
- * TODO This should also receive heartbeats from clients
  */
-public class ExecutionMachine extends HeartbeatSender implements IExecutionMachine{
+public class ExecutionMachine extends HeartbeatSender implements IExecutionMachine, IHeartbeatMonitor{
 
 	private static final long serialVersionUID = 1L;
 	
-	private Collection<EndPoint> clients = new CopyOnWriteArrayList<EndPoint>(); 
+	/**
+	 * The list of clients for which we are the main server
+	 */
+	private List<ReferenceClient> clients = new CopyOnWriteArrayList<ReferenceClient>();
+	
+	/**
+	 * The list of clients for which we are the backup
+	 */
+	private List<ReferenceClient> backupclients = new CopyOnWriteArrayList<ReferenceClient>(); 
 	
 	private final transient EndPoint endpoint;
 	
@@ -48,16 +53,41 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	 * Communicate the new amount of clients to the Central Manager.
 	 * 
 	 * @param client The client to add
+	 * @param main Whether we are the main server for this client
+	 * @throws AlreadyBoundException 
+	 * @throws InstantiationException 
+	 * @returns The heartbeat endpoint for this client
 	 */
-	public void addClient() throws RemoteException{
+	public EndPoint addClient(boolean main) throws RemoteException{
+		ReferenceClient out = null;
+		String localname = "REFCLIENT_" + clients.size();
+		if (main)
+			out = addClientToList(clients, localname);
+		else
+			out = addClientToList(backupclients, localname);
+		setPayload(clients.size());
+		if (out != null)
+			return new EndPoint(localname);
+		else
+			return null;
+	}
+	
+	/**
+	 * Return non-null on success
+	 */
+	private ReferenceClient addClientToList(List<ReferenceClient> list, String regname) throws RemoteException{
+		ReferenceClient out = null;
 		try {
-			clients.add(RMINamingURLParser.fromURL(RemoteServer.getClientHost()));
+			list.add(new ReferenceClient(new EndPoint(regname), this));
+			out = list.get(list.size()-1);
 		} catch (MalformedURLException e) {
 			throw new RemoteException();
-		} catch (ServerNotActiveException e) {
+		} catch (InstantiationException e) {
+			throw new RemoteException();
+		} catch (AlreadyBoundException e) {
 			throw new RemoteException();
 		}
-		setPayload(clients.size());
+		return out;
 	}
 	
 	/**
@@ -74,13 +104,19 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	/**
 	 * @return The list of registered clients
 	 */
-	public Collection<EndPoint> getClients(){
+	public List<ReferenceClient> getClients(){
 		return clients;
 	}
 
 	@Override
 	public void missedBeat(long id) {
 		// TODO Uh oh, we got disconnected from the Central Manager
+	}
+
+	@Override
+	public void missedBeat(EndPoint remote) {
+		// TODO Uh oh, a client dropped
+		
 	}
 	
 	

@@ -34,6 +34,8 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	
 	private transient String remoteHost = null;
 	
+	private IHeartbeatMonitor monitor;
+	
 	/**
 	 * Bind ourselves to an endpoint
 	 * 
@@ -44,6 +46,12 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	 * @throws MalformedURLException 
 	 */
 	public HeartbeatReceiver(EndPoint endpoint) throws MalformedURLException, RemoteException, InstantiationException, AlreadyBoundException{
+		this(endpoint, null);
+	}
+	
+	public HeartbeatReceiver(EndPoint endpoint, IHeartbeatMonitor monitor) throws MalformedURLException, RemoteException, InstantiationException, AlreadyBoundException{	
+		setMonitor(monitor);
+		
 		this.endpoint = endpoint;
 
 		this.endpoint.open((IHeartbeatReceiver) UnicastRemoteObject.exportObject(this, 0));
@@ -110,12 +118,24 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	}
 
 	/**
-	 * Called if a sequence number is not received within the timeout
-	 * 
-	 * @param id The sequence number of the missed heartbeat
+	 * Lost connection to the HeartbeatSender.
 	 */
 	public void missedBeat(long id){
-		System.out.println("Did not receive " + id + " in time!");
+		if (monitor != null)
+			try {
+				monitor.missedBeat(getRemoteHost());
+			} catch (MalformedURLException e) {
+				monitor.missedBeat(null);
+			}
+	}
+	
+	/**
+	 * Set the monitor for this heartbeat
+	 * 
+	 * @param monitor
+	 */
+	public void setMonitor(IHeartbeatMonitor monitor){
+		this.monitor = monitor;
 	}
 	
 	/**

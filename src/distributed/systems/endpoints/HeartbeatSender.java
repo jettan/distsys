@@ -9,11 +9,14 @@ public class HeartbeatSender implements Runnable{
 
 	private final static long BEAT_TIME = 100;
 
+	private EndPoint remote;
 	private IHeartbeatReceiver rmInterface;
 	
 	private boolean alive = true;
 	
 	private Serializable payload;
+	
+	private IHeartbeatMonitor monitor;
 	
 	/**
 	 * Construct a new HeartBeat sender without an endpoint
@@ -34,6 +37,21 @@ public class HeartbeatSender implements Runnable{
 	public HeartbeatSender(EndPoint remote) throws MalformedURLException, RemoteException, NotBoundException{
 		connect(remote);
 	}
+	
+	/**
+	 * Construct a new HeartbeatSender and immediately start the heartbeat:
+	 * same as calling setMonitor() and connect() after construction.
+	 * 
+	 * @param remote
+	 * @param monitor
+	 * @throws MalformedURLException
+	 * @throws RemoteException
+	 * @throws NotBoundException
+	 */
+	public HeartbeatSender(EndPoint remote, IHeartbeatMonitor monitor) throws MalformedURLException, RemoteException, NotBoundException{
+		setMonitor(monitor);
+		connect(remote);
+	}
 			
 	/**
 	 * Connect to the remote endpoint and set up the heartbeat
@@ -44,6 +62,7 @@ public class HeartbeatSender implements Runnable{
 	 * @throws NotBoundException
 	 */
 	public void connect(EndPoint remote) throws MalformedURLException, RemoteException, NotBoundException{
+		this.remote = remote;
 		rmInterface = (IHeartbeatReceiver) remote.connect();
 		
 		Thread t = new Thread(this);
@@ -63,10 +82,19 @@ public class HeartbeatSender implements Runnable{
 	
 	/**
 	 * Lost connection to the HeartbeatReceiver.
-	 * Overwrite this method to do something useful.
 	 */
 	public void missedBeat(long id){
-		System.out.println("Failed to send heartbeat " + id);
+		if (monitor != null)
+			monitor.missedBeat(remote);
+	}
+	
+	/**
+	 * Set the monitor for this heartbeat
+	 * 
+	 * @param monitor
+	 */
+	public void setMonitor(IHeartbeatMonitor monitor){
+		this.monitor = monitor;
 	}
 	
 	/**

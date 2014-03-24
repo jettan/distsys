@@ -66,5 +66,9 @@ public class EndPoint {
 	public Remote connect() throws MalformedURLException, RemoteException, NotBoundException{
 		return Naming.lookup(getURI());
 	}
+	
+	public boolean equals(EndPoint other){
+		return getURI().equals(other.getURI());
+	}
 
 }
