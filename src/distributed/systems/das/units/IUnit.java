@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
 import distributed.systems.core.IMessageReceivedHandler;
 import distributed.systems.das.units.Unit.UnitType;
 
-public interface UnitRef extends Remote, Serializable, IMessageReceivedHandler{
+public interface IUnit extends Remote, Serializable, IMessageReceivedHandler{
 
 	public void adjustHitPoints(int modifier) throws RemoteException;
 

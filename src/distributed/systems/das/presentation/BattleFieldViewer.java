@@ -13,10 +13,7 @@ import javax.swing.JPanel;
 
 import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
-import distributed.systems.das.units.Dragon;
-import distributed.systems.das.units.Player;
-import distributed.systems.das.units.Unit;
-import distributed.systems.das.units.UnitRef;
+import distributed.systems.das.units.IUnit;
 import distributed.systems.das.units.Unit.UnitType;
 
 /**
@@ -68,7 +65,7 @@ public class BattleFieldViewer extends JPanel implements Runnable {
 	 * for dragons and a blue one for players. 
 	 */
 	public void paint(Graphics g) {
-		UnitRef u;
+		IUnit u;
 		double x = 0, y = 0;
 		double xRatio = (double)this.getWidth() / (double)BattleField.MAP_WIDTH;
 		double yRatio = (double)this.getHeight() / (double)BattleField.MAP_HEIGHT;
@@ -105,7 +102,7 @@ public class BattleFieldViewer extends JPanel implements Runnable {
 
 				/* Fill the unit color */
 				doubleBufferGraphics.fillRect((int)x + 1, (int)y + 1, (int)xRatio - 1, (int)yRatio - 1);
-
+				
 				/* Draw healthbar */
 				doubleBufferGraphics.setColor(Color.GREEN);
 				try {

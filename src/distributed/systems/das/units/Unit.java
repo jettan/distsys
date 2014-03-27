@@ -24,7 +24,7 @@ import distributed.systems.example.LocalSocket;
  *  
  * @author Pieter Anemaet, Boaz Pat-El
  */
-public abstract class Unit implements UnitRef {
+public abstract class Unit implements IUnit {
 	private static final long serialVersionUID = -4550572524008491160L;
 
 	// Position of the unit
@@ -260,7 +260,7 @@ public abstract class Unit implements UnitRef {
 		spawnMessage.put("request", MessageRequest.spawnUnit);
 		spawnMessage.put("x", x);
 		spawnMessage.put("y", y);
-		spawnMessage.put("unit", (UnitRef) this);
+		spawnMessage.put("unit", (IUnit) this);
 		spawnMessage.put("id", id);
 		spawnMessage.put("origin", "D" + unitID);
 		
@@ -322,7 +322,7 @@ public abstract class Unit implements UnitRef {
 		
 	}
 
-	protected UnitRef getUnit(int x, int y)
+	protected IUnit getUnit(int x, int y)
 	{
 		Message getMessage = new Message(), result;
 		int id = localMessageCounter++;
@@ -355,7 +355,7 @@ public abstract class Unit implements UnitRef {
 		result = messageList.get(id);
 		messageList.remove(id);
 
-		return (UnitRef) result.get("unit");	
+		return (IUnit) result.get("unit");	
 	}
 
 	protected void removeUnit(int x, int y)
@@ -385,7 +385,7 @@ public abstract class Unit implements UnitRef {
 		moveMessage.put("x", x);
 		moveMessage.put("y", y);
 		moveMessage.put("id", id);
-		moveMessage.put("unit", (UnitRef) this);
+		moveMessage.put("unit", (IUnit) this);
 		moveMessage.put("origin", "D" + unitID);
 
 		// Send the getUnit message
@@ -413,7 +413,7 @@ public abstract class Unit implements UnitRef {
 		messageList.remove(id);
 	}
 
-	public void onMessageReceived(Message message) {
+	public synchronized void onMessageReceived(Message message) {
 		messageList.put((Integer)message.get("id"), message);
 	}
 	
