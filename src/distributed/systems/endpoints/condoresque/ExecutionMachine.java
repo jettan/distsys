@@ -63,12 +63,12 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 		String localname = endpoint.getRegistryName() + "_REFCLIENT_" + clients.size();
 		if (!main)
 			localname = endpoint.getRegistryName() + "_REFCLIENT_b" + backupclients.size();
-		System.out.println("BINDING REFERENCE CLIENT TO " + localname);
+		
 		if (main)
 			out = addClientToList(clients, localname);
 		else
 			out = addClientToList(backupclients, localname);
-		System.out.println("SENDING OVER NEW CLIENT SIZE: " + (clients.size()+backupclients.size()));
+		
 		setPayload(clients.size()+backupclients.size());
 		if (out != null)
 			return new EndPoint(localname);

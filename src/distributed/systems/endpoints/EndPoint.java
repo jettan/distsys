@@ -67,7 +67,6 @@ public class EndPoint implements Serializable{
 	}
 	
 	public Remote connect() throws MalformedURLException, RemoteException, NotBoundException{
-		System.out.println("CONNECTING ENDPOINT TO " + getURI());
 		return Naming.lookup(getURI());
 	}
 	

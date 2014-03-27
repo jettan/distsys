@@ -1,7 +1,5 @@
 package test;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NoSuchObjectException;
@@ -28,7 +26,7 @@ public class TestHeartbeats {
 		// Set up a server side heartbeat receiver and detect client drop
 		HeartbeatReceiver hbr = new HeartbeatReceiver(srv);
 		// Set up a client side heartbeat sender and detect server drop
-		HeartbeatSender hbs = new HeartbeatSender(clt);
+		HeartbeatSender hbs = new HeartbeatSender(null, clt);
 		
 		System.out.println("RUNNING TEST FOR 5 SECONDS");
 		System.out.println("EXPECTING DELIVERY OF 2 MESSAGES:");

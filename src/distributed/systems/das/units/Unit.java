@@ -272,7 +272,6 @@ public abstract class Unit implements UnitRef {
 			return false;
 		}
 		
-		System.out.println("Messagelist size: " + messageList.size());
 		// Wait for the unit to be placed
 		getUnit(x, y);
 		
@@ -318,7 +317,7 @@ public abstract class Unit implements UnitRef {
 		if (result == null) // Could happen if the game window had closed
 			return UnitType.undefined;
 		messageList.remove(id);
-		System.out.println("RETURNING TYPE " + result.get("type") + " : " + UnitType.values()[(Integer)result.get("type")]);
+		
 		return UnitType.values()[(Integer)result.get("type")];	
 		
 	}
@@ -341,7 +340,6 @@ public abstract class Unit implements UnitRef {
 			e1.printStackTrace();
 		}
 		
-		System.out.println("[D" + unitID + "] Start waiting! Current messageList size: " + messageList.size());
 		// Wait for the reply
 		while(!messageList.containsKey(id)) {
 			try {
@@ -353,7 +351,7 @@ public abstract class Unit implements UnitRef {
 			if (!GameState.getRunningState())
 				return null;
 		}
-		System.out.println("[D" + unitID + "] Done waiting!");
+
 		result = messageList.get(id);
 		messageList.remove(id);
 
@@ -416,9 +414,7 @@ public abstract class Unit implements UnitRef {
 	}
 
 	public void onMessageReceived(Message message) {
-		System.out.println("[D" + unitID + "] Received " + message);
 		messageList.put((Integer)message.get("id"), message);
-		System.out.println(getClass().getName());
 	}
 	
 	// Disconnects the unit from the battlefield by exiting its run-state

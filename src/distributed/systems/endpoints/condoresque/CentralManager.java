@@ -42,8 +42,6 @@ public class CentralManager implements ICentralManager{
 			try {
 				EndPoint main = machines.get(0).getRemoteHost();
 				EndPoint backup = machines.get(1).getRemoteHost();
-				System.out.println("Allocated main: " + main.getURI());
-				System.out.println("Allocated backup: " + backup.getURI());
 				allocation = new Allocation(main, backup);
 			} catch (Exception e) {
 				//Failed to allocate
