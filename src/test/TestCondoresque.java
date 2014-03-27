@@ -82,6 +82,20 @@ public class TestCondoresque {
 		} catch (InterruptedException e) {
 		} 
 		
+		System.out.println("SURPRISE! DROPPING A CLIENT");
+		clients.get(0).fakeCrash();
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+		}
+		
+		System.out.println("SURPRISE! DROPPING A SERVER");
+		eMachines.get(1).fakeCrash();
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+		}
+		
 		System.out.println("SHUTTING DOWN");
 		for (int i = 0; i < clientAmount; i++)
 			try{

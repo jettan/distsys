@@ -3,6 +3,7 @@ package distributed.systems.endpoints;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
+import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
@@ -71,6 +72,8 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 		try {
 			if (sender != null)
 				remoteHost = new EndPoint(RemoteServer.getClientHost(), sender.getPort(), sender.getRegistryName());
+			else
+				remoteHost = new EndPoint(RemoteServer.getClientHost(), 1099, "?");
 		} catch (ServerNotActiveException e1) {
 		}
 		
@@ -101,6 +104,10 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 		try {
 			endpoint.close();
 		} catch (MalformedURLException e) {
+		}
+		try {
+			java.rmi.server.UnicastRemoteObject.unexportObject(this,true);
+		} catch (NoSuchObjectException e) {
 		}
 	}
 	

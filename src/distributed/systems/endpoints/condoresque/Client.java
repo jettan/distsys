@@ -6,9 +6,8 @@ import java.rmi.RemoteException;
 
 import distributed.systems.das.units.Unit;
 import distributed.systems.endpoints.EndPoint;
-import distributed.systems.endpoints.IHeartbeatMonitor;
 
-public class Client implements IHeartbeatMonitor{
+public class Client{
 
 	/// The unit corresponding to this client.
 	private Unit unit;
@@ -31,11 +30,12 @@ public class Client implements IHeartbeatMonitor{
 			ICentralManager centralManager = (ICentralManager) this.centralManager.connect();
 			
 			// Request allocation from the central manager.
-			this.allocation = centralManager.requestExecution();
+			allocation = centralManager.requestExecution();
 			
-			if (this.allocation != null){
+			if (allocation != null){
 				// Start the heartbeats
-				this.allocation.createHeartbeats(this);
+				allocation.setCM(centralManager);
+				allocation.createHeartbeats();
 				return true;
 			}
 			
@@ -60,13 +60,8 @@ public class Client implements IHeartbeatMonitor{
 	public Unit getUnit() {
 		return this.unit;
 	}
-
-	@Override
-	public void missedBeat(EndPoint remote) {
-		if (allocation.getMain().equals(remote)){
-			// TODO lost connection to main server
-		} else {
-			// TODO lost connection to backup server
-		}
+	
+	public void fakeCrash(){
+		allocation.fakeCrash();
 	}
 }

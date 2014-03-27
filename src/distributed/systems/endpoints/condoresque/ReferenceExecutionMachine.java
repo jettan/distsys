@@ -46,6 +46,5 @@ public class ReferenceExecutionMachine extends HeartbeatReceiver implements Comp
 	public int compareTo(ReferenceExecutionMachine o) {
 		return Long.compare(latestClientCount, o.getLatestClientCount());
 	}
-	
-	
+
 }

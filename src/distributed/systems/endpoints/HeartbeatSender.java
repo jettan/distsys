@@ -136,6 +136,13 @@ public class HeartbeatSender implements Runnable{
 	public void fakeCrash(){
 		alive = false;
 	}
+	
+	/**
+	 * Stop without notifying the other endpoint
+	 */
+	public void emergencyStop(){
+		alive = false;
+	}
 
 	/**
 	 * Send heartbeats periodically and check for drops

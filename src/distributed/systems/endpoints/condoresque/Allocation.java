@@ -13,15 +13,16 @@ public class Allocation implements Serializable, IHeartbeatMonitor {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final EndPoint main;
-	private final EndPoint backup;
+	private EndPoint main;
+	private EndPoint backup;
 	
 	private transient IExecutionMachine mainmachine;
 	private transient IExecutionMachine backupmachine;
 	
 	private transient HeartbeatSender mainHB;
 	private transient HeartbeatSender backupHB;
-	private transient IHeartbeatMonitor monitor;
+	
+	private transient ICentralManager centralManager;
 	
 	public Allocation(EndPoint main, EndPoint backup){
 		this.main = main;
@@ -36,9 +37,7 @@ public class Allocation implements Serializable, IHeartbeatMonitor {
 		return backup;
 	}
 
-	public void createHeartbeats(IHeartbeatMonitor monitor) throws MalformedURLException, RemoteException, NotBoundException{
-		this.monitor = monitor;
-		
+	public void createHeartbeats() throws MalformedURLException, RemoteException, NotBoundException{
 		mainmachine = (IExecutionMachine) main.connect();
 		backupmachine = (IExecutionMachine) backup.connect();
 		
@@ -65,10 +64,38 @@ public class Allocation implements Serializable, IHeartbeatMonitor {
 			throw out;
 	}
 	
+	public void fakeCrash(){
+		mainHB.fakeCrash();
+		backupHB.fakeCrash();
+	}
+	
 	@Override
 	public void missedBeat(EndPoint remote) {
-		if (monitor != null)
-			monitor.missedBeat(remote);
+		try {
+			if (remote.getURI().startsWith(main.getURI())){
+				// Main dropped, request server that is not backup
+				mainHB.emergencyStop();
+				main = centralManager.requestReplacement(backup);
+				mainmachine = (IExecutionMachine) main.connect();
+				EndPoint mep = mainmachine.addClient(true);
+				mainHB = new HeartbeatSender(null, new EndPoint(main.getHostName(), main.getPort(), mep.getRegistryName()), this);
+				System.err.println("MAIN SERVER DROPPED: REPLACING WITH " + main);
+			} else if (remote.getURI().startsWith(backup.getURI())) {
+				// Backup dropped, request server that is not main
+				backupHB.emergencyStop();
+				backup = centralManager.requestReplacement(main);
+				backupmachine = (IExecutionMachine) backup.connect();
+				EndPoint bep = backupmachine.addClient(false);
+				backupHB = new HeartbeatSender(null, new EndPoint(backup.getHostName(), backup.getPort(), bep.getRegistryName()), this);
+				System.err.println("BACKUP SERVER DROPPED: REPLACING WITH " + backup);
+			}
+		} catch (RemoteException | MalformedURLException | NotBoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void setCM(ICentralManager centralManager) {
+		this.centralManager = centralManager;
 	}
 
 }

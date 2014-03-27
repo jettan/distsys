@@ -43,7 +43,11 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 			try {
 				EndPoint main = machines.get(0).getRemoteHost();
 				EndPoint backup = machines.get(1).getRemoteHost();
-				allocation = new Allocation(main, backup);
+				//Randomly distribute main and backup
+				if (Math.random() <= 0.5)
+					allocation = new Allocation(main, backup);
+				else
+					allocation = new Allocation(backup, main);
 			} catch (Exception e) {
 				//Failed to allocate
 				// - Not enough machines
@@ -54,24 +58,30 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 		
 		return allocation;
 	}
-
+	
 	/**
-	 * Initialize a certain amount of execution server connections
-	 * 
-	 * NOTE: This is what the execution machines connect to at their own leisure.
-	 * These need to be in place before the execution machines start. 
-	 * 
-	 * @param amount The amount of servers to deploy
+	 * Called by a client to retrieve a new partial allocation where
+	 * the new host is not equal to ep.
 	 */
-	public void initializeServerInterfaces(int amount){
-		for (int i = 0; i < amount; i++){
+	@Override
+	public EndPoint requestReplacement(EndPoint ep) throws RemoteException {
+		//No two clients can ever be deployed at the same time
+		synchronized(machines){
+			Collections.sort(machines);
 			try {
-				machines.add(new ReferenceExecutionMachine(new EndPoint("REFEXMACHINE_" + i)));
-			} catch (MalformedURLException | RemoteException
-					| InstantiationException | AlreadyBoundException e) {
-				e.printStackTrace();
+				EndPoint first = machines.get(0).getRemoteHost();
+				if (!first.equals(ep))
+					return first;
+				return machines.get(1).getRemoteHost();
+			} catch (Exception e) {
+				//Failed to allocate
+				// - Not enough machines
+				// - Machines not connected
+				// - Some other horrible error
 			}
 		}
+		
+		return null;
 	}
 
 	/**
@@ -95,16 +105,15 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 	@Override
 	public void missedBeat(EndPoint remote) {
 		System.err.println("DROPPED EXECUTION MACHINE " + remote);
-		ReferenceExecutionMachine delme = null;
 		synchronized(machines){
-			for (ReferenceExecutionMachine ep : machines){
-				if (remote.equals(ep.getRemoteHost())){
-					delme = ep;
+			ReferenceExecutionMachine delme = null;
+			for (ReferenceExecutionMachine rem : machines){
+				if (remote.equals(rem.getRemoteHost())){
+					delme = rem;
 					break;
-				}
+				}	
 			}
-			if (delme != null)
-				machines.remove(delme);
+			machines.remove(delme);
 		}
 	}
 }

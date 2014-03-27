@@ -58,7 +58,7 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	 * @throws InstantiationException 
 	 * @returns The heartbeat endpoint for this client
 	 */
-	public EndPoint addClient(boolean main) throws RemoteException{
+	public synchronized EndPoint addClient(boolean main) throws RemoteException{
 		ReferenceClient out = null;
 		String localname = endpoint.getRegistryName() + "_REFCLIENT_" + clients.size();
 		if (!main)
@@ -69,7 +69,7 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 		else
 			out = addClientToList(backupclients, localname);
 		
-		setPayload(clients.size()+backupclients.size());
+		setPayload(getTotalClients());
 		if (out != null)
 			return new EndPoint(localname);
 		else
@@ -97,16 +97,36 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	 * 
 	 * @param client The client to remove
 	 */
-	public void removeClient(EndPoint client){
+	public synchronized void removeClient(EndPoint client){
 		clients.remove(client);	// If this doesn't remove anything, clients.size() will still be correct!
-		setPayload(clients.size()+backupclients.size());
+		backupclients.remove(client);
+		setPayload(getTotalClients());
 	}
 	
 	/**
-	 * @return The list of registered clients
+	 * @return The total amount of registered (backup) clients
 	 */
-	public List<ReferenceClient> getClients(){
-		return clients;
+	public int getTotalClients(){
+		return clients.size() + backupclients.size();
+	}
+	
+	@Override
+	public void fakeCrash(){
+		super.fakeCrash();
+		for (ReferenceClient rc : clients){
+			try {
+				rc.release();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+		for (ReferenceClient rc : backupclients){
+			try {
+				rc.release();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
@@ -117,7 +137,8 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	@Override
 	public void missedBeat(EndPoint remote) {
 		// TODO Uh oh, a client dropped
-		
+		System.err.println("DROPPED CLIENT " + remote);
+		removeClient(remote);
 	}
 	
 	
