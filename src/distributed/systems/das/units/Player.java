@@ -5,7 +5,6 @@ import java.rmi.RemoteException;
 
 import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
-import distributed.systems.das.units.Unit.UnitType;
 
 /**
  * A Player is, as the name implies, a playing 

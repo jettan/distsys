@@ -22,7 +22,7 @@ public class Test implements IMessageReceivedHandler, Serializable{
 		
 		// SERVER code
 		//Socket srv = new SynchronizedSocket(new LocalSocket());
-		Handler srvHandler = new Handler("5678"); //Upon receipt of a message, send one back
+		new Handler("5678"); //Upon receipt of a message, send one back
 		//srv.addMessageReceivedHandler(srvHandler);
 		
 		// CLIENT code

@@ -24,7 +24,7 @@ public class TestHeartbeats {
 		EndPoint clt = new EndPoint("localhost", 1099, "HB_RECEIVER");
 		
 		// Set up a server side heartbeat receiver and detect client drop
-		HeartbeatReceiver hbr = new HeartbeatReceiver(srv);
+		new HeartbeatReceiver(srv);
 		// Set up a client side heartbeat sender and detect server drop
 		HeartbeatSender hbs = new HeartbeatSender(null, clt);
 		

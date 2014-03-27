@@ -1,6 +1,5 @@
 package distributed.systems.das.units;
 
-import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
-import distributed.systems.das.units.Unit.UnitType;
 
 /**
  * A dragon is a non-playing character, which can't

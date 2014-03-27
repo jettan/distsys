@@ -4,9 +4,6 @@ import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
-import distributed.systems.das.units.Dragon;
-import distributed.systems.das.units.Player;
-import distributed.systems.das.units.Unit;
 import distributed.systems.das.units.Unit.UnitType;
 import distributed.systems.das.units.IUnit;
 import distributed.systems.core.IMessageReceivedHandler;
