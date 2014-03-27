@@ -247,7 +247,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	}
 
 	public void onMessageReceived(Message msg) {
-		Message reply = null;
+		Message reply = new Message();
 		String origin = (String)msg.get("origin");
 		MessageRequest request = (MessageRequest)msg.get("request");
 		IUnit unit;
@@ -255,19 +255,17 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		{
 			case spawnUnit:
 			{
-				reply = new Message();
 				reply.put("id", msg.get("id"));
-				this.spawnUnit((IUnit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
+				reply.put("committed", spawnUnit((IUnit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y")));
 				break;
 			}
 			case putUnit:
 			{
-				this.putUnit((IUnit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
+				reply.put("committed", putUnit((IUnit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y")));
 				break;
 			}
 			case getUnit:
 			{
-				reply = new Message();
 				int x = (Integer)msg.get("x");
 				int y = (Integer)msg.get("y");
 				/* Copy the id of the message so that the unit knows 
@@ -280,7 +278,6 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 			}
 			case getType:
 			{
-				reply = new Message();
 				int x = (Integer)msg.get("x");
 				int y = (Integer)msg.get("y");
 				/* Copy the id of the message so that the unit knows 
@@ -302,6 +299,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 			}
 			case dealDamage:
 			{
+				reply = null;
 				int x = (Integer)msg.get("x");
 				int y = (Integer)msg.get("y");
 				unit = this.getUnit(x, y);
@@ -319,6 +317,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 			}
 			case healDamage:
 			{
+				reply = null;
 				int x = (Integer)msg.get("x");
 				int y = (Integer)msg.get("y");
 				unit = this.getUnit(x, y);
@@ -336,8 +335,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 			}
 			case moveUnit:
 			{
-				reply = new Message();
-				this.moveUnit((IUnit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
+				reply.put("committed", moveUnit((IUnit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y")));
 				/* Copy the id of the message so that the unit knows 
 				 * what message the battlefield responded to. 
 				 */
@@ -346,6 +344,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 			}
 			case removeUnit:
 			{
+				reply = null;
 				this.removeUnit((Integer)msg.get("x"), (Integer)msg.get("y"));
 				return;
 			}

@@ -14,5 +14,5 @@ public interface IExecutionMachine extends Remote, Serializable {
 	 * Return the heartbeat thread to the client
 	 */
 	public EndPoint addClient(boolean main) throws RemoteException;
-	
+
 }

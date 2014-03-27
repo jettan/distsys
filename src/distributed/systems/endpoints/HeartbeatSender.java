@@ -129,6 +129,13 @@ public class HeartbeatSender implements Runnable{
 	public boolean isPayloadDelivered(){
 		return payload == null;
 	}
+	
+	/**
+	 * Perform a 'crash'
+	 */
+	public void fakeCrash(){
+		alive = false;
+	}
 
 	/**
 	 * Send heartbeats periodically and check for drops

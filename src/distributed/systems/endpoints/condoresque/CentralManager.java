@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import distributed.systems.endpoints.EndPoint;
+import distributed.systems.endpoints.IHeartbeatMonitor;
 
 
 /**
  * This is an actual Central Manager implementation that runs on the Central Manager
  */
-public class CentralManager implements ICentralManager{
+public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 
 	private static final long serialVersionUID = 1L;
 
@@ -79,6 +80,31 @@ public class CentralManager implements ICentralManager{
 	@Override
 	public int requestMachineID() throws RemoteException {
 		int id = lastid.incrementAndGet();
+		try {
+			ReferenceExecutionMachine rem = new ReferenceExecutionMachine(new EndPoint("REFEXMACHINE_" + id));
+			rem.setMonitor(this);
+			machines.add(rem);
+		} catch (MalformedURLException | InstantiationException
+				| AlreadyBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return id;
+	}
+
+	@Override
+	public void missedBeat(EndPoint remote) {
+		System.err.println("DROPPED EXECUTION MACHINE " + remote);
+		ReferenceExecutionMachine delme = null;
+		synchronized(machines){
+			for (ReferenceExecutionMachine ep : machines){
+				if (remote.equals(ep.getRemoteHost())){
+					delme = ep;
+					break;
+				}
+			}
+			if (delme != null)
+				machines.remove(delme);
+		}
 	}
 }

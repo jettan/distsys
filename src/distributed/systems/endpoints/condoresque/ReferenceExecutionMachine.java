@@ -34,11 +34,6 @@ public class ReferenceExecutionMachine extends HeartbeatReceiver implements Comp
 	}
 
 	@Override
-	public void missedBeat(long id) {
-		// TODO Uh oh, an Execution Machine dropped
-	}
-
-	@Override
 	public void receivePayload(Serializable payload) {
 		if (payload instanceof Integer){
 			latestClientCount = (Integer) payload;

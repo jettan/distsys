@@ -37,8 +37,7 @@ public class TestCondoresque {
 		 * Bind the central manager
 		 * (Normally done on different device)
 		 */
-		CentralManager centralManager = new CentralManager(centralManagerEP); 
-		centralManager.initializeServerInterfaces(eMachineAmount);
+		new CentralManager(centralManagerEP); 
 		
 		/**
 		 * Bind every execution machine
@@ -49,6 +48,13 @@ public class TestCondoresque {
 			eMachines.add(new ExecutionMachine(centralManagerEP, execMachinesEPs.get(i)));
 		
 		System.out.println("SERVER SETUP FINISHED, STARTING SLEEP");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+		} 
+		
+		System.out.println("SURPRISE! DROPPING A SERVER");
+		eMachines.get(0).fakeCrash();
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {

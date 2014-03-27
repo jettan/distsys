@@ -73,5 +73,9 @@ public class EndPoint implements Serializable{
 	public boolean equals(EndPoint other){
 		return getURI().equals(other.getURI());
 	}
+	
+	public String toString(){
+		return "EndPoint(" + getURI() + ")";
+	}
 
 }
