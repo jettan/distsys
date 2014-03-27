@@ -163,6 +163,14 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		assert x >= 0 && x < map.length;
 		assert y >= 0 && x < map[0].length;
 
+		try {
+			if (map[x][y] != null && map[x][y].getHitPoints() <= 0)
+				removeUnit(x, y);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return map[x][y];
 	}
 
@@ -220,7 +228,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 */
 	private synchronized void removeUnit(int x, int y)
 	{
-		IUnit unitToRemove = this.getUnit(x, y);
+		IUnit unitToRemove = map[x][y];
 		if (unitToRemove == null)
 			return; // There was no unit here to remove
 		map[x][y] = null;

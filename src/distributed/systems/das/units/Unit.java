@@ -413,7 +413,7 @@ public abstract class Unit implements IUnit {
 		messageList.remove(id);
 	}
 
-	public synchronized void onMessageReceived(Message message) {
+	public void onMessageReceived(Message message) {
 		messageList.put((Integer)message.get("id"), message);
 	}
 	
