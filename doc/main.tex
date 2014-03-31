@@ -89,6 +89,18 @@ Finally, we conclude the report in section 7.
 
 In this section, we will shortly describe background information about the DAS application and the requirements stated for the game engine behind it.
 
+DAS is an online warfare in which the world is a grid battlefield of 25x25 squares.
+In this battlefield, dragons and knights (players) battle each other until the strongest race survives.
+
+To implement a distributed game engine of DAS, the following requirements have been proposed:
+
+\begin{itemize}
+	\item Since it is difficult to test the system with real players, it has to be emulated (i.e. players take a simple strategy where they heal a nearby player with low health or attack a dragon otherwise)
+	\item Clients and server nodes could crash at any time and restart. To handle this, all events must be logged in the order in which they occur on at least 2 server nodes
+	\item The DAS application must be tested with any number of players up to 100 and up to 20 dragons with 5 server nodes
+\end{itemize}
+
+
 \section{System Design}
 \label{sec:design}
 Design...
