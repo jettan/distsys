@@ -6,7 +6,11 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import distributed.systems.endpoints.EndPoint;
@@ -22,8 +26,24 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 
 	public static String serverID = "centralmanager";
 	
-	private transient List<ReferenceExecutionMachine> machines = new ArrayList<ReferenceExecutionMachine>(); 
+	/**
+	 * The list of all the known execution machines
+	 */
+	private transient List<ReferenceExecutionMachine> machines = new ArrayList<ReferenceExecutionMachine>();
 	
+	/**
+	 * The ring mapping for all machines we know of
+	 * 
+	 * For example, if machine 2 dropped:
+	 *  REFEXMACHINE_0 points to execution machine 1
+	 *  REFEXMACHINE_1 points to execution machine 3
+	 *  REFEXMACHINE_3 points to execution machine 0
+	 */
+	private transient ConcurrentHashMap<String, ReferenceExecutionMachine> ringMap = new ConcurrentHashMap<String, ReferenceExecutionMachine>();
+	
+	/**
+	 * The atomic id we use to assign ids to machines
+	 */
 	private transient AtomicInteger lastid = new AtomicInteger(-1);
 
 	public CentralManager(EndPoint local) throws MalformedURLException, RemoteException, InstantiationException, AlreadyBoundException{
@@ -39,10 +59,11 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 		
 		//No two clients can ever be deployed at the same time
 		synchronized(machines){
-			Collections.sort(machines);
+			ArrayList<ReferenceExecutionMachine> al = new ArrayList<ReferenceExecutionMachine>(machines);
+			Collections.sort(al);
 			try {
-				EndPoint main = machines.get(0).getRemoteHost();
-				EndPoint backup = machines.get(1).getRemoteHost();
+				EndPoint main = al.get(0).getRemoteHost();
+				EndPoint backup = al.get(1).getRemoteHost();
 				//Randomly distribute main and backup
 				if (Math.random() <= 0.5)
 					allocation = new Allocation(main, backup);
@@ -67,12 +88,13 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 	public EndPoint requestReplacement(EndPoint ep) throws RemoteException {
 		//No two clients can ever be deployed at the same time
 		synchronized(machines){
-			Collections.sort(machines);
+			ArrayList<ReferenceExecutionMachine> al = new ArrayList<ReferenceExecutionMachine>(machines);
+			Collections.sort(al);
 			try {
-				EndPoint first = machines.get(0).getRemoteHost();
+				EndPoint first = al.get(0).getRemoteHost();
 				if (!first.equals(ep))
 					return first;
-				return machines.get(1).getRemoteHost();
+				return al.get(1).getRemoteHost();
 			} catch (Exception e) {
 				//Failed to allocate
 				// - Not enough machines
@@ -85,15 +107,24 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 	}
 
 	/**
+	 * Called by execution machines to get the next machine in the ring
+	 */
+	@Override
+	public EndPoint nextMachine(String myName) throws RemoteException {
+		return ringMap.get(myName).getRemoteHost();
+	}
+
+	/**
 	 * Called by execution machines to get an id assigned
 	 */
 	@Override
 	public int requestMachineID() throws RemoteException {
 		int id = lastid.incrementAndGet();
 		try {
-			ReferenceExecutionMachine rem = new ReferenceExecutionMachine(new EndPoint("REFEXMACHINE_" + id));
+			ReferenceExecutionMachine rem = new ReferenceExecutionMachine(id);
 			rem.setMonitor(this);
 			machines.add(rem);
+			addLastMachineToRing();
 		} catch (MalformedURLException | InstantiationException
 				| AlreadyBoundException e) {
 			// TODO Auto-generated catch block
@@ -105,15 +136,88 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 	@Override
 	public void missedBeat(EndPoint remote) {
 		System.err.println("DROPPED EXECUTION MACHINE " + remote);
+		ReferenceExecutionMachine delme = null;
 		synchronized(machines){
-			ReferenceExecutionMachine delme = null;
 			for (ReferenceExecutionMachine rem : machines){
-				if (remote.equals(rem.getRemoteHost())){
+				if (remote.getRegistryName().equals(rem.getRemoteName())){
 					delme = rem;
 					break;
 				}	
 			}
 			machines.remove(delme);
+			removeMachineFromRing(delme);
 		}
+		
+	}
+	
+	/**
+	 * Link up the last machine added to the machine list to the ring
+	 * 
+	 * WARNING: NEEDS TO BE EXECUTED IN A synchronized(machines) STATEMENT 
+	 */
+	private void addLastMachineToRing(){
+		synchronized(ringMap){
+			ReferenceExecutionMachine machine = machines.get(machines.size()-1);
+			ringMap.put(machine.getName(), machines.get(0)); // Loop back to beginning of list/ring
+			if (machines.size() > 1){
+				ReferenceExecutionMachine predecessor = machines.get(machines.size()-2);
+				ringMap.put(predecessor.getName(), machine);
+			}
+		}
+	}
+	
+	/**
+	 * Remove an execution machine from the ring
+	 * 
+	 * WARNING: NEEDS TO BE EXECUTED IN A synchronized(machines) STATEMENT 
+	 * 
+	 * @param rem The machine to remove
+	 */
+	private void removeMachineFromRing(ReferenceExecutionMachine rem){
+		synchronized(ringMap){
+			ReferenceExecutionMachine next = ringMap.remove(rem.getName());
+			for (String name : ringMap.keySet()){
+				if (ringMap.get(name).getId() == rem.getId()){
+					ringMap.put(name, next);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Create a String representation of the current ring for debugging purposes
+	 */
+	public String ringToString(){
+		String out = "";
+		synchronized(machines){
+			Iterator<ReferenceExecutionMachine> it = machines.iterator();
+			while (it.hasNext()){
+				ReferenceExecutionMachine rem = it.next();
+				if ("".equals(out)){
+					out += rem.getId();
+				} else {
+					out += " -> " + rem.getId();
+				}
+			}
+		}
+		return out;
+	}
+	
+	/**
+	 * Create a String representation of the current ringMap for debugging purposes
+	 */
+	public String ringMapToString(){
+		String out = "";
+		synchronized(ringMap){
+			for (String name : ringMap.keySet()){
+				ReferenceExecutionMachine rem = ringMap.get(name);
+				if ("".equals(out)){
+					out += name + " -> " + rem.getId();
+				} else {
+					out += "\n" + name + " -> " + rem.getId();
+				}
+			}
+		}
+		return out;
 	}
 }

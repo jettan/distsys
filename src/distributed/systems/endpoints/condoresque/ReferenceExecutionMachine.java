@@ -19,10 +19,12 @@ public class ReferenceExecutionMachine extends HeartbeatReceiver implements Comp
 	private static final long serialVersionUID = 1L;
 	
 	private transient long latestClientCount = 0;
+	private transient final int id;
 
-	public ReferenceExecutionMachine(EndPoint endpoint) throws MalformedURLException,
+	public ReferenceExecutionMachine(int id) throws MalformedURLException,
 			RemoteException, InstantiationException, AlreadyBoundException {
-		super(endpoint);
+		super(new EndPoint("REFEXMACHINE_" + id));
+		this.id = id;
 	}
 	
 	/**
@@ -31,6 +33,18 @@ public class ReferenceExecutionMachine extends HeartbeatReceiver implements Comp
 	 */
 	public long getLatestClientCount(){
 		return latestClientCount;
+	}
+	
+	public int getId(){
+		return id;
+	}
+	
+	public String getName(){
+		return "REFEXMACHINE_" + id;
+	}
+	
+	public String getRemoteName(){
+		return "EXECUTION_MACHINE_" + id;
 	}
 
 	@Override

@@ -37,7 +37,7 @@ public class TestCondoresque {
 		 * Bind the central manager
 		 * (Normally done on different device)
 		 */
-		new CentralManager(centralManagerEP); 
+		CentralManager cm = new CentralManager(centralManagerEP); 
 		
 		/**
 		 * Bind every execution machine
@@ -46,6 +46,8 @@ public class TestCondoresque {
 		ArrayList<ExecutionMachine> eMachines = new ArrayList<ExecutionMachine>();
 		for (int i = 0; i < eMachineAmount; i++)
 			eMachines.add(new ExecutionMachine(centralManagerEP, execMachinesEPs.get(i)));
+		
+		System.out.println("CM ring is: " + cm.ringToString());
 		
 		System.out.println("SERVER SETUP FINISHED, STARTING SLEEP");
 		try {
@@ -59,6 +61,8 @@ public class TestCondoresque {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 		} 
+		
+		System.out.println("CM ring is: " + cm.ringToString());
 		
 		/**
 		 * Bind every client
@@ -95,6 +99,9 @@ public class TestCondoresque {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
 		}
+		
+		System.out.println("final CM ring is: \n" + cm.ringToString());
+		System.out.println(cm.ringMapToString());
 		
 		System.out.println("SHUTTING DOWN");
 		for (int i = 0; i < clientAmount; i++)

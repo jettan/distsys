@@ -29,4 +29,12 @@ public interface ICentralManager extends Remote, Serializable {
 	 */
 	public int requestMachineID() throws RemoteException;
 	
+	/**
+	 * Return the EndPoint to the next machine in the machine ring
+	 * 
+	 * @return The EndPoint to the next machine in the machine ring
+	 * @throws RemoteException
+	 */
+	public EndPoint nextMachine(String myName) throws RemoteException;
+	
 }
