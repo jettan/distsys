@@ -467,7 +467,7 @@ public abstract class Unit implements IUnit {
 			EndPoint backup = getBattlefieldFor(alloc.getBackup());
 			IMessageReceivedHandler remoteReceiver;
 			try {
-				remoteReceiver = (IMessageReceivedHandler) main.connect();
+				remoteReceiver = (IMessageReceivedHandler) backup.connect();
 				remoteReceiver.onMessageReceived(m);
 			} catch (MalformedURLException | RemoteException
 					| NotBoundException e1) {
