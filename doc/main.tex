@@ -103,7 +103,23 @@ To implement a distributed game engine of DAS, the following requirements have b
 
 \section{System Design}
 \label{sec:design}
-Design...
+
+In this section, we will present our design of the system.
+To meet the scalability requirements, we have chosen to adapt a Condor-like architecture (add cite here).
+
+
+A \emph{client} initially connects to a \emph{central manager} to get an allocation of two \emph{execution machines} which will further handle all requests from this client.
+The central manager only keeps track of the total amount of clients connected throughout the whole system by asking this to the execution machines.
+If one of the two execution machines of a client crashes, the other (backup) execution machine will continue operating as usual.
+When the crashed execution machine has restarted, the execution machine that picked up all the tasks will replicate itself to this restarted execution machine.
+One might think that relying on a central component like the central manager makes the system have single point of failure,
+as opposed to the original Condor architecture, which also include submission machines.
+In the Condor architecture, the central manager acts like a \emph{matchmaker} and matches jobs with machines.
+It would then notify the submission machine that in turn starts a shadow process (representation of the remote job) on the execution machines.
+In our architecture, we completely skip the steps involving the submission machine and let the client start its job on the allocated execution machines.
+
+Each component of the system (central manager, execution machines and client) has a \emph{heartbeat} to let the rest system know that he is still alive.
+As soon as a heartbeat is not received anymore from that particular component, we know that component has crashed.
 
 \section{Experimental Results}
 \label{sec:results}
