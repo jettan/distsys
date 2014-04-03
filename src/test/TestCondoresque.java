@@ -70,7 +70,7 @@ public class TestCondoresque {
 		 */
 		ArrayList<Client> clients = new ArrayList<Client>();
 		for (int i = 0; i < clientAmount; i++){
-			Client client = new Client(null, centralManagerEP);
+			Client client = new Client(centralManagerEP);
 			if (!client.connect())
 				System.err.println("ALLOCATION FAILED FOR CLIENT " + i);
 			clients.add(client);
