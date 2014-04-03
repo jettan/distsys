@@ -128,6 +128,10 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 			}
 		}
 	}
+	
+	public EndPoint getBattlefieldReg(){
+		return new EndPoint(endpoint.getRegistryName()+"/BATTLEFIELD");
+	}
 
 	@Override
 	public void missedBeat(long id) {

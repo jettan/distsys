@@ -4,21 +4,18 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-import distributed.systems.das.units.Unit;
 import distributed.systems.endpoints.EndPoint;
 
 public class Client{
-
-	/// The unit corresponding to this client.
-	private Unit unit;
 	
-	/// The allocation got from the central manager.
+	/** 
+	 * The allocation got from the central manager.
+	 */
 	private Allocation allocation;
 	
 	private final EndPoint centralManager;
 	
-	public Client(Unit u, EndPoint centralManager) {
-		this.unit       = u;
+	public Client(EndPoint centralManager) {
 		this.allocation = null;
 		this.centralManager = centralManager;
 	}
@@ -57,8 +54,8 @@ public class Client{
 		return true;
 	}
 	
-	public Unit getUnit() {
-		return this.unit;
+	public Allocation getAllocation(){
+		return allocation;
 	}
 	
 	public void fakeCrash(){

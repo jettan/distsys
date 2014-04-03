@@ -1,5 +1,7 @@
 package distributed.systems.das.units;
 
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +15,9 @@ import distributed.systems.core.Socket;
 import distributed.systems.core.SynchronizedSocket;
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
+import distributed.systems.endpoints.EndPoint;
+import distributed.systems.endpoints.condoresque.Allocation;
+import distributed.systems.endpoints.condoresque.Client;
 import distributed.systems.example.LocalSocket;
 
 /**
@@ -41,6 +46,7 @@ public abstract class Unit implements IUnit {
 
 	// The communication socket between this client and the board
 	protected Socket clientSocket;
+	protected Client client;
 	
 	// Map messages from their ids
 	private Map<Integer, Message> messageList;
@@ -433,5 +439,64 @@ public abstract class Unit implements IUnit {
 			assert(false) : "Unit stopRunnerThread was interrupted";
 		}
 		
+	}
+	
+	/**
+	 * Get the battlefield registry on a remote machine
+	 * 
+	 * @param server The EndPoint of the server we are connecting to
+	 * @return The corresponding battlefield endpoint
+	 */
+	private EndPoint getBattlefieldFor(EndPoint server){
+		return new EndPoint(server.getHostName(), server.getPort(), server.getRegistryName()+"/BATTLEFIELD");
+	}
+	
+	/**
+	 * Send a message through the Condoresque Client
+	 * 
+	 * @param m The Message to send
+	 * @return Whether the operation was successful
+	 */
+	private boolean sendMessage(Message m){
+		Allocation alloc = client.getAllocation();
+		EndPoint main = getBattlefieldFor(alloc.getMain());
+		try {
+			IMessageReceivedHandler remoteReceiver = (IMessageReceivedHandler) main.connect();
+			remoteReceiver.onMessageReceived(m);
+		} catch (MalformedURLException | RemoteException | NotBoundException e) {
+			EndPoint backup = getBattlefieldFor(alloc.getBackup());
+			IMessageReceivedHandler remoteReceiver;
+			try {
+				remoteReceiver = (IMessageReceivedHandler) main.connect();
+				remoteReceiver.onMessageReceived(m);
+			} catch (MalformedURLException | RemoteException
+					| NotBoundException e1) {
+				return false;
+			}	
+		}
+		return true;
+	}
+	
+	/**
+	 * Send a message and wait for a response
+	 * 
+	 * @param m The message to send
+	 * @return Whether the operation was successful
+	 */
+	private boolean sendAndWait(Message m){
+		if (!sendMessage(m))
+			return false;
+		// Wait for the reply
+		while(!messageList.containsKey(m.get("id"))) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+			}
+
+			// Quit if the game window has closed
+			if (!GameState.getRunningState())
+				return false;
+		}
+		return true;
 	}
 }
