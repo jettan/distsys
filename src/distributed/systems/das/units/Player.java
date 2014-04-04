@@ -37,9 +37,9 @@ public class Player extends Unit implements Runnable, Serializable {
 	 * the hit and the attackpoints. 
 	 * @throws RemoteException 
 	 */
-	public Player(int x, int y) throws RemoteException {
+	public Player(BattleField bf, int x, int y) throws RemoteException {
 		/* Initialize the hitpoints and attackpoints */
-		super((int)(Math.random() * (MAX_HITPOINTS - MIN_HITPOINTS) + MIN_HITPOINTS), (int)(Math.random() * (MAX_ATTACKPOINTS - MIN_ATTACKPOINTS) + MIN_ATTACKPOINTS));
+		super(bf, (int)(Math.random() * (MAX_HITPOINTS - MIN_HITPOINTS) + MIN_HITPOINTS), (int)(Math.random() * (MAX_ATTACKPOINTS - MIN_ATTACKPOINTS) + MIN_ATTACKPOINTS));
 
 		/* Create a random delay */
 		timeBetweenTurns = (int)(Math.random() * (MAX_TIME_BETWEEN_TURNS - MIN_TIME_BETWEEN_TURNS)) + MIN_TIME_BETWEEN_TURNS;

@@ -3,6 +3,7 @@ package distributed.systems.das;
 import java.rmi.*;
 import java.rmi.registry.Registry;
 
+import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.das.presentation.BattleFieldViewer;
 import distributed.systems.das.units.Dragon;
 import distributed.systems.das.units.Player;
@@ -35,7 +36,11 @@ public class Core {
 			e.printStackTrace();
 		}
 		
-		battlefield = BattleField.getBattleField();
+		try {
+			battlefield = new BattleField(BattleField.MAP_WIDTH, BattleField.MAP_HEIGHT);
+		} catch (RemoteException | AlreadyAssignedIDException e2) {
+			e2.printStackTrace();
+		}
 
 		/* All the dragons connect */
 		for(int i = 0; i < DRAGON_COUNT; i++) {
@@ -60,7 +65,7 @@ public class Core {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						new Dragon(finalX, finalY);
+						new Dragon(battlefield, finalX, finalY);
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}
@@ -94,7 +99,7 @@ public class Core {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						new Player(finalX, finalY);
+						new Player(battlefield, finalX, finalY);
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}
@@ -106,7 +111,7 @@ public class Core {
 		/* Spawn a new battlefield viewer */
 		new Thread(new Runnable() {
 			public void run() {
-				new BattleFieldViewer();
+				new BattleFieldViewer(battlefield);
 			}
 		}).start();
 		
@@ -143,7 +148,7 @@ public class Core {
 					new Thread(new Runnable() {
 						public void run() {
 							try {
-								new Player(finalX, finalY);
+								new Player(battlefield, finalX, finalY);
 							} catch (RemoteException e) {
 								e.printStackTrace();
 							}
@@ -159,7 +164,7 @@ public class Core {
 		/* Make sure both the battlefield and
 		 * the socketmonitor close down.
 		 */
-		BattleField.getBattleField().shutdown();
+		battlefield.shutdown();
 		
 		System.out.println("Sleeping for 2 seconds to allow all threads to finish.");
 		try { Thread.sleep(2000); } catch (InterruptedException e1) { }

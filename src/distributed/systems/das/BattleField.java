@@ -55,7 +55,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * @param height of the battlefield
 	 * @throws AlreadyAssignedIDException 
 	 */
-	private BattleField(int width, int height) throws RemoteException, AlreadyAssignedIDException {
+	public BattleField(int width, int height) throws RemoteException, AlreadyAssignedIDException {
 		LocalSocket local = new LocalSocket();
 		
 		synchronized (this) {
@@ -75,7 +75,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * 
 	 * @return the battlefield.
 	 */
-	public static BattleField getBattleField() {
+	/*public static BattleField getBattleField() {
 		if (battlefield == null)
 			try {
 				battlefield = new BattleField(MAP_WIDTH, MAP_HEIGHT);
@@ -85,7 +85,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				e.printStackTrace();
 			}
 		return battlefield;
-	}
+	}*/
 	
 	/**
 	 * Puts a new unit at the specified position. First, it

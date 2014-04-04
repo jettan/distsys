@@ -81,7 +81,7 @@ public abstract class Unit implements IUnit {
 	 * this specific unit.
 	 * @throws RemoteException 
 	 */
-	public Unit(int maxHealth, int attackPoints) throws RemoteException {
+	public Unit(BattleField bf, int maxHealth, int attackPoints) throws RemoteException {
 		Socket localSocket = new LocalSocket();
 
 		messageList = new ConcurrentHashMap<Integer, Message>();
@@ -93,7 +93,7 @@ public abstract class Unit implements IUnit {
 		this.attackPoints = attackPoints;
 
 		// Get a new unit id
-		unitID = BattleField.getBattleField().getNewUnitID();
+		unitID = bf.getNewUnitID();
 
 		// Create a new socket
 		clientSocket = new SynchronizedSocket(localSocket);

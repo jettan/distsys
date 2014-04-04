@@ -39,15 +39,17 @@ public class BattleFieldViewer extends JPanel implements Runnable {
 	 * (See stopRunnerThread())
 	 */
 	private Thread runnerThread;
-
+	private BattleField battlefield;
+	
 	/**
 	 * Create a battlefield viewer in 
 	 * a new thread. 
 	 */
-	public BattleFieldViewer() {
+	public BattleFieldViewer(BattleField bf) {
 		doubleBufferGraphics = null;
 		runnerThread = new Thread(this);
 		runnerThread.start();
+		battlefield = bf;
 	}
 
 	/**
@@ -70,7 +72,7 @@ public class BattleFieldViewer extends JPanel implements Runnable {
 		double xRatio = (double)this.getWidth() / (double)BattleField.MAP_WIDTH;
 		double yRatio = (double)this.getHeight() / (double)BattleField.MAP_HEIGHT;
 		double filler = 0;
-		BattleField bf = BattleField.getBattleField();
+		BattleField bf = battlefield;
 
 		/* Possibly adjust the double buffer */
 		if(bufferWidth != getSize().width 
