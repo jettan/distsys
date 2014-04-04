@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 
 import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
+import distributed.systems.endpoints.condoresque.Client;
 
 /**
  * A Player is, as the name implies, a playing 
@@ -37,9 +38,9 @@ public class Player extends Unit implements Runnable, Serializable {
 	 * the hit and the attackpoints. 
 	 * @throws RemoteException 
 	 */
-	public Player(BattleField bf, int x, int y) throws RemoteException {
+	public Player(BattleField bf, Client client, int x, int y) throws RemoteException {
 		/* Initialize the hitpoints and attackpoints */
-		super(bf, (int)(Math.random() * (MAX_HITPOINTS - MIN_HITPOINTS) + MIN_HITPOINTS), (int)(Math.random() * (MAX_ATTACKPOINTS - MIN_ATTACKPOINTS) + MIN_ATTACKPOINTS));
+		super(bf, client, (int)(Math.random() * (MAX_HITPOINTS - MIN_HITPOINTS) + MIN_HITPOINTS), (int)(Math.random() * (MAX_ATTACKPOINTS - MIN_ATTACKPOINTS) + MIN_ATTACKPOINTS));
 
 		/* Create a random delay */
 		timeBetweenTurns = (int)(Math.random() * (MAX_TIME_BETWEEN_TURNS - MIN_TIME_BETWEEN_TURNS)) + MIN_TIME_BETWEEN_TURNS;
@@ -122,6 +123,8 @@ public class Player extends Unit implements Runnable, Serializable {
 
 				// Get what unit lies in the target square
 				adjacentUnitType = this.getType(targetX, targetY);
+				if (adjacentUnitType == null)
+					continue; // Most likely the game is over
 				
 				switch (adjacentUnitType) {
 					case undefined:
@@ -141,7 +144,6 @@ public class Player extends Unit implements Runnable, Serializable {
 				e.printStackTrace();
 			}
 		}
-		clientSocket.unRegister();
 	}
 
 }

@@ -1,8 +1,10 @@
 package distributed.systems.das.units;
 
 import java.net.MalformedURLException;
+import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,7 +47,6 @@ public abstract class Unit implements IUnit {
 	private int unitID;
 
 	// The communication socket between this client and the board
-	protected Socket clientSocket;
 	protected Client client;
 	
 	// Map messages from their ids
@@ -81,7 +82,7 @@ public abstract class Unit implements IUnit {
 	 * this specific unit.
 	 * @throws RemoteException 
 	 */
-	public Unit(BattleField bf, int maxHealth, int attackPoints) throws RemoteException {
+	public Unit(BattleField bf, Client client, int maxHealth, int attackPoints) throws RemoteException {
 		Socket localSocket = new LocalSocket();
 
 		messageList = new ConcurrentHashMap<Integer, Message>();
@@ -95,22 +96,14 @@ public abstract class Unit implements IUnit {
 		// Get a new unit id
 		unitID = bf.getNewUnitID();
 
-		// Create a new socket
-		clientSocket = new SynchronizedSocket(localSocket);
-
+		this.client = client;
+		
+		EndPoint clientSocket = new EndPoint("D" + unitID);
 		try {
-			// Try to register the socket
-			clientSocket.register("D" + unitID);
-		}
-		catch (AlreadyAssignedIDException e) {
-			System.err.println("Socket \"D" + unitID + "\" was already registered.");
-		}
-
-		IMessageReceivedHandler stub;
-		try {
-			stub = (IMessageReceivedHandler) java.rmi.server.UnicastRemoteObject.exportObject(this, 0);
-			clientSocket.addMessageReceivedHandler(stub);
-		} catch (RemoteException e) {
+			clientSocket.open((IMessageReceivedHandler) UnicastRemoteObject.exportObject(this, 0));
+		} catch (MalformedURLException | InstantiationException
+				| AlreadyBoundException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -154,12 +147,7 @@ public abstract class Unit implements IUnit {
 		}
 		
 		// Send a spawn message
-		try {
-			clientSocket.sendMessage(damageMessage, "localsocket://" + BattleField.serverID);
-		} catch (IDNotAssignedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		sendMessage(damageMessage);
 	}
 	
 	public void healDamage(int x, int y, int healed) {
@@ -181,12 +169,7 @@ public abstract class Unit implements IUnit {
 		}
 
 		// Send a spawn message
-		try {
-			clientSocket.sendMessage(healMessage, "localsocket://" + BattleField.serverID);
-		} catch (IDNotAssignedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		sendMessage(healMessage);
 	}
 
 	/**
@@ -270,17 +253,11 @@ public abstract class Unit implements IUnit {
 		spawnMessage.put("origin", "D" + unitID);
 		
 		// Send a spawn message
-		try {
-			clientSocket.sendMessage(spawnMessage, "localsocket://" + BattleField.serverID);
-		} catch (IDNotAssignedException e) {
-			System.err.println("No server found while spawning unit at location (" + x + ", " + y + ")");
+		if (!sendMessage(spawnMessage))
 			return false;
-		}
 		
 		// Wait for the unit to be placed
-		getUnit(x, y);
-		
-		return true;
+		return getUnit(x, y) != null;
 	}
 	
 	/**
@@ -299,24 +276,8 @@ public abstract class Unit implements IUnit {
 		getMessage.put("origin", "D" + unitID);
 		
 		// Send the getUnit message
-		try {
-			clientSocket.sendMessage(getMessage, "localsocket://" + BattleField.serverID);
-		} catch (IDNotAssignedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-		// Wait for the reply
-		while(!messageList.containsKey(id)) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-			}
-
-			// Quit if the game window has closed
-			if (!GameState.getRunningState())
-				return UnitType.undefined;
-		}
+		if (!sendAndWait(getMessage))
+			return null;
 
 		result = messageList.get(id);
 		if (result == null) // Could happen if the game window had closed
@@ -338,25 +299,9 @@ public abstract class Unit implements IUnit {
 		getMessage.put("origin", "D" + unitID);
 
 		// Send the getUnit message
-		try {
-			clientSocket.sendMessage(getMessage, "localsocket://" + BattleField.serverID);
-		} catch (IDNotAssignedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		if (!sendAndWait(getMessage))
+			return null;
 		
-		// Wait for the reply
-		while(!messageList.containsKey(id)) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-			}
-
-			// Quit if the game window has closed
-			if (!GameState.getRunningState())
-				return null;
-		}
-
 		result = messageList.get(id);
 		messageList.remove(id);
 
@@ -374,12 +319,7 @@ public abstract class Unit implements IUnit {
 		removeMessage.put("origin", "D" + unitID);
 
 		// Send the removeUnit message
-		try {
-			clientSocket.sendMessage(removeMessage, "localsocket://" + BattleField.serverID);
-		} catch (IDNotAssignedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		sendMessage(removeMessage);
 	}
 
 	protected void moveUnit(int x, int y)
@@ -394,25 +334,8 @@ public abstract class Unit implements IUnit {
 		moveMessage.put("origin", "D" + unitID);
 
 		// Send the getUnit message
-		try {
-			clientSocket.sendMessage(moveMessage, "localsocket://" + BattleField.serverID);
-		} catch (IDNotAssignedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-		// Wait for the reply
-		while(!messageList.containsKey(id))
-		{
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-			}
-
-			// Quit if the game window has closed
-			if (!GameState.getRunningState())
-				return;
-		}
+		if (!sendAndWait(moveMessage))
+			return;
 
 		// Remove the result from the messageList
 		messageList.remove(id);

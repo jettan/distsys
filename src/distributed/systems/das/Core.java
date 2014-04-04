@@ -1,12 +1,18 @@
 package distributed.systems.das;
 
+import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.das.presentation.BattleFieldViewer;
 import distributed.systems.das.units.Dragon;
 import distributed.systems.das.units.Player;
+import distributed.systems.endpoints.EndPoint;
+import distributed.systems.endpoints.condoresque.CentralManager;
+import distributed.systems.endpoints.condoresque.Client;
+import distributed.systems.endpoints.condoresque.ExecutionMachine;
 
 /**
  * Controller part of the DAS game. Initializes 
@@ -41,6 +47,26 @@ public class Core {
 		} catch (RemoteException | AlreadyAssignedIDException e2) {
 			e2.printStackTrace();
 		}
+		
+		final EndPoint centralManagerEP = new EndPoint("CENTRAL_MANAGER");
+		try {
+			CentralManager cm = new CentralManager(centralManagerEP);
+		} catch (MalformedURLException | RemoteException
+				| InstantiationException | AlreadyBoundException e2) {
+			e2.printStackTrace();
+		}
+		
+		for (int i = 0; i < 2; i++){
+			EndPoint ep = new EndPoint("EXECUTION_MACHINE_" + i);
+			try {
+				ExecutionMachine em = new ExecutionMachine(centralManagerEP, ep);
+				battlefield = new ServerBattleField(em, BattleField.MAP_WIDTH, BattleField.MAP_HEIGHT); // Viewing through one of two servers
+			} catch (MalformedURLException | RemoteException
+					| InstantiationException | NotBoundException
+					| AlreadyBoundException | AlreadyAssignedIDException e) {
+				e.printStackTrace();
+			}
+		}
 
 		/* All the dragons connect */
 		for(int i = 0; i < DRAGON_COUNT; i++) {
@@ -65,7 +91,9 @@ public class Core {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						new Dragon(battlefield, finalX, finalY);
+						Client c = new Client(centralManagerEP);
+						c.connect();
+						new Dragon(battlefield, c, finalX, finalY);
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}
@@ -99,7 +127,9 @@ public class Core {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						new Player(battlefield, finalX, finalY);
+						Client c = new Client(centralManagerEP);
+						c.connect();
+						new Player(battlefield, c, finalX, finalY);
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}
@@ -148,7 +178,9 @@ public class Core {
 					new Thread(new Runnable() {
 						public void run() {
 							try {
-								new Player(battlefield, finalX, finalY);
+								Client c = new Client(centralManagerEP);
+								c.connect();
+								new Player(battlefield, c, finalX, finalY);
 							} catch (RemoteException e) {
 								e.printStackTrace();
 							}

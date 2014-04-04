@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
+import distributed.systems.endpoints.condoresque.Client;
 
 /**
  * A dragon is a non-playing character, which can't
@@ -40,10 +41,10 @@ public class Dragon extends Unit implements Runnable, Serializable {
 	 * @throws RemoteException 
 	 *
 	 */
-	public Dragon(BattleField bf, int x, int y) throws RemoteException {
+	public Dragon(BattleField bf, Client client, int x, int y) throws RemoteException {
 		/* Spawn the dragon with a random number of hitpoints between
 		 * 50..100 and 5..20 attackpoints. */
-		super(bf, (int)(Math.random() * (MAX_HITPOINTS - MIN_HITPOINTS) + MIN_HITPOINTS), (int)(Math.random() * (MAX_ATTACKPOINTS - MIN_ATTACKPOINTS) + MIN_ATTACKPOINTS));
+		super(bf, client, (int)(Math.random() * (MAX_HITPOINTS - MIN_HITPOINTS) + MIN_HITPOINTS), (int)(Math.random() * (MAX_ATTACKPOINTS - MIN_ATTACKPOINTS) + MIN_ATTACKPOINTS));
 
 		/* Create a random delay */
 		timeBetweenTurns = (int)(Math.random() * (MAX_TIME_BETWEEN_TURNS - MIN_TIME_BETWEEN_TURNS)) + MIN_TIME_BETWEEN_TURNS;
@@ -122,8 +123,6 @@ public class Dragon extends Unit implements Runnable, Serializable {
 				e.printStackTrace();
 			}
 		}
-		clientSocket.unRegister();
-
 	}
 
 }

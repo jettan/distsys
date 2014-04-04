@@ -1,6 +1,9 @@
 package distributed.systems.das;
 
+import java.net.MalformedURLException;
 import java.rmi.*;
+import java.rmi.server.RemoteServer;
+import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
@@ -12,6 +15,7 @@ import distributed.systems.core.Socket;
 import distributed.systems.core.SynchronizedSocket;
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.core.exception.IDNotAssignedException;
+import distributed.systems.endpoints.EndPoint;
 import distributed.systems.example.LocalSocket;
 
 /**
@@ -33,11 +37,8 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	/* The array of units */
 	private IUnit[][] map;
 
-	/* The static singleton */
-	private static BattleField battlefield;
-
 	/* Primary socket of the battlefield */ 
-	private Socket serverSocket;
+	//private Socket serverSocket;
 	
 	/* The last id that was assigned to an unit. This variable is used to
 	 * enforce that each unit has its own unique id.
@@ -56,14 +57,10 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * @throws AlreadyAssignedIDException 
 	 */
 	public BattleField(int width, int height) throws RemoteException, AlreadyAssignedIDException {
-		LocalSocket local = new LocalSocket();
+		//LocalSocket local = new LocalSocket();
 		
 		synchronized (this) {
 			map = new IUnit[width][height];
-			
-			local.register(BattleField.serverID);
-			serverSocket = new SynchronizedSocket(local);
-			serverSocket.addMessageReceivedHandler(this);
 			units = new ArrayList<IUnit>();
 		}
 		
@@ -352,10 +349,24 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 
 		try {
 			if (reply != null) {
-				serverSocket.sendMessage(reply, origin);
+				final EndPoint ep = new EndPoint(RemoteServer.getClientHost(), 1099, (String) msg.get("origin"));
+				final Message freply = reply;
+				Thread t = new Thread(new Runnable(){
+					@Override
+					public void run() {
+						try {
+							IMessageReceivedHandler imrh = (IMessageReceivedHandler) ep.connect();
+							imrh.onMessageReceived(freply);
+						} catch (RemoteException | MalformedURLException | NotBoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				});
+				t.start();
 			}
 		}
-		catch(IDNotAssignedException idnae)  {
+		catch(ServerNotActiveException idnae)  {
 			// Could happen if the target already logged out
 		}
 	}
@@ -381,8 +392,6 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				e.printStackTrace();
 			}
 		}
-
-		serverSocket.unRegister();
 	}
 	
 }
