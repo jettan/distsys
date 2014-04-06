@@ -56,7 +56,7 @@ public class Core {
 			e2.printStackTrace();
 		}
 		
-		for (int i = 0; i < 2; i++){
+		for (int i = 0; i < 5; i++){
 			EndPoint ep = new EndPoint("EXECUTION_MACHINE_" + i);
 			try {
 				ExecutionMachine em = new ExecutionMachine(centralManagerEP, ep);
