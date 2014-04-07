@@ -87,7 +87,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				e.printStackTrace();
 			}
 		}
-		units.add(unit);	// TODO Synchronize this
+		addUnit(unit);
 
 		return true;
 	}
@@ -206,7 +206,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		units.remove(unitToRemove);	// TODO Synchronize this
+		removeUnit(unitToRemove);
 	}
 
 	/**
@@ -214,7 +214,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * @return int: a new unique unit ID.
 	 */
 	public synchronized int getNewUnitID() {
-		return ++lastUnitID;	// TODO Synchronize this
+		return ++lastUnitID;
 	}
 
 	public void onMessageReceived(Message msg) {
@@ -362,6 +362,14 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		}
 	}
 	
+	protected boolean isEmpty(int x, int y){
+		try {
+			return map[x][y] == null || map[x][y].getHitPoints() <= 0;
+		} catch (RemoteException e) {
+			return map[x][y] == null;
+		}
+	}
+	
 	/**
 	 * The raw setting of a Unit on a certain position
 	 */
@@ -377,6 +385,18 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		map[originalX][originalY] = null;
 		map[x][y] = unit;
 		return true;
+	}
+	
+	public void addUnit(IUnit unit){
+		synchronized(units){
+			units.add(unit);
+		}
+	}
+	
+	public void removeUnit(IUnit unit){
+		synchronized(units){
+			units.remove(unit);
+		}
 	}
 	
 }
