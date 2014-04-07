@@ -103,6 +103,9 @@ public class TestCondoresque {
 		System.out.println("final CM ring is: \n" + cm.ringToString());
 		System.out.println(cm.ringMapToString());
 		
+		System.out.println("Next machine for 2 is:");
+		System.out.println(cm.nextMachine(eMachines.get(2).getCallbackEndpoint().getRegistryName()));
+		
 		System.out.println("SHUTTING DOWN");
 		for (int i = 0; i < clientAmount; i++)
 			try{

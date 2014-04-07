@@ -143,6 +143,10 @@ public class HeartbeatSender implements Runnable{
 	public void emergencyStop(){
 		alive = false;
 	}
+	
+	public EndPoint getCallbackEndpoint(){
+		return local;
+	}
 
 	/**
 	 * Send heartbeats periodically and check for drops

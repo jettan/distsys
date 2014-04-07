@@ -13,14 +13,9 @@ import distributed.systems.das.GameState;
 import distributed.systems.das.MessageRequest;
 import distributed.systems.core.IMessageReceivedHandler;
 import distributed.systems.core.Message;
-import distributed.systems.core.Socket;
-import distributed.systems.core.SynchronizedSocket;
-import distributed.systems.core.exception.AlreadyAssignedIDException;
-import distributed.systems.core.exception.IDNotAssignedException;
 import distributed.systems.endpoints.EndPoint;
 import distributed.systems.endpoints.condoresque.Allocation;
 import distributed.systems.endpoints.condoresque.Client;
-import distributed.systems.example.LocalSocket;
 
 /**
  * Base class for all players whom can 
@@ -83,8 +78,6 @@ public abstract class Unit implements IUnit {
 	 * @throws RemoteException 
 	 */
 	public Unit(BattleField bf, Client client, int maxHealth, int attackPoints) throws RemoteException {
-		Socket localSocket = new LocalSocket();
-
 		messageList = new ConcurrentHashMap<Integer, Message>();
 
 		// Initialize the max health and health

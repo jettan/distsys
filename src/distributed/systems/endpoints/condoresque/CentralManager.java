@@ -158,10 +158,10 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 	private void addLastMachineToRing(){
 		synchronized(ringMap){
 			ReferenceExecutionMachine machine = machines.get(machines.size()-1);
-			ringMap.put(machine.getName(), machines.get(0)); // Loop back to beginning of list/ring
+			ringMap.put(machine.getRemoteName(), machines.get(0)); // Loop back to beginning of list/ring
 			if (machines.size() > 1){
 				ReferenceExecutionMachine predecessor = machines.get(machines.size()-2);
-				ringMap.put(predecessor.getName(), machine);
+				ringMap.put(predecessor.getRemoteName(), machine);
 			}
 		}
 	}
@@ -175,7 +175,7 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 	 */
 	private void removeMachineFromRing(ReferenceExecutionMachine rem){
 		synchronized(ringMap){
-			ReferenceExecutionMachine next = ringMap.remove(rem.getName());
+			ReferenceExecutionMachine next = ringMap.remove(rem.getRemoteName());
 			for (String name : ringMap.keySet()){
 				if (ringMap.get(name).getId() == rem.getId()){
 					ringMap.put(name, next);

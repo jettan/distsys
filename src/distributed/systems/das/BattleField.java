@@ -80,9 +80,9 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 			if (map[x][y] != null)
 				return false;
 	
-			map[x][y] = unit;			// TODO Synchronize this
+			rawSetUnit(x, y, unit);
 			try {
-				unit.setPosition(x, y); // TODO Do this only once
+				unit.setPosition(x, y);
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
@@ -109,9 +109,9 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		if (map[x][y] != null)
 			return false;
 
-		map[x][y] = unit;				// TODO Synchronize this
+		rawSetUnit(x, y, unit);
 		try {
-			unit.setPosition(x, y);		// TODO Do this only once
+			unit.setPosition(x, y);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -176,8 +176,12 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		if (newX >= 0 && newX < BattleField.MAP_WIDTH)
 			if (newY >= 0 && newY < BattleField.MAP_HEIGHT)
 				if (map[newX][newY] == null) {
-					if (putUnit(unit, newX, newY)) {
-						map[originalX][originalY] = null;	// TODO Synchronize this
+					if (rawMoveUnit(newX, newY, originalX, originalY, unit)){
+						try {
+							unit.setPosition(newX, newY);
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						}
 						return true;
 					}
 				}
@@ -196,9 +200,9 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		IUnit unitToRemove = map[x][y];
 		if (unitToRemove == null)
 			return; // There was no unit here to remove
-		map[x][y] = null;	// TODO Synchronize this
+		rawSetUnit(x, y, null);
 		try {
-			unitToRemove.disconnect();	// TODO Do this only once
+			unitToRemove.disconnect();
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -356,6 +360,23 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * The raw setting of a Unit on a certain position
+	 */
+	public boolean rawSetUnit(int x, int y, IUnit unit){
+		map[x][y] = unit;
+		return true;
+	}
+	
+	/**
+	 * The moving of a Unit on a certain position
+	 */
+	public boolean rawMoveUnit(int x, int y, int originalX, int originalY, IUnit unit){
+		map[originalX][originalY] = null;
+		map[x][y] = unit;
+		return true;
 	}
 	
 }

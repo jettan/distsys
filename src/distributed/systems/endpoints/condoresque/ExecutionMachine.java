@@ -31,6 +31,7 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	private List<ReferenceClient> backupclients = new CopyOnWriteArrayList<ReferenceClient>(); 
 	
 	private final transient EndPoint endpoint;
+	private final transient EndPoint centralManager;
 	
 	/**
 	 * Connect to the Central Manager and hook into our personal heartbeat thread.
@@ -43,6 +44,8 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 			RemoteException, NotBoundException, InstantiationException, AlreadyBoundException {
 		// We have to construct our super on the first line, so yeah
 		super(local, new EndPoint(centralManager.getHostName(), centralManager.getPort(), "REFEXMACHINE_" + ((ICentralManager) centralManager.connect()).requestMachineID()));
+		
+		this.centralManager = centralManager;
 		
 		endpoint = local;
 		endpoint.open((IExecutionMachine) UnicastRemoteObject.exportObject(this, 0));
@@ -131,6 +134,17 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	
 	public EndPoint getBattlefieldReg(){
 		return new EndPoint(endpoint.getRegistryName()+"/BATTLEFIELD");
+	}
+	
+	public EndPoint nextServerBattlefield(){
+		EndPoint raw = getBattlefieldReg();
+		try {
+			raw = ((ICentralManager) centralManager.connect()).nextMachine(endpoint.getRegistryName());
+		} catch (RemoteException | MalformedURLException | NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new EndPoint(raw.getHostName(), raw.getPort(), raw.getRegistryName()+"/BATTLEFIELD");
 	}
 
 	@Override
