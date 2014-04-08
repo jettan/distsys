@@ -8,6 +8,7 @@ import distributed.systems.das.units.IUnit;
 public interface IServerBattleField extends Remote {
 
 	public String getName() throws RemoteException;
+	public int getNewUnitID() throws RemoteException;
 	public int getNewUnitID(String registry) throws RemoteException;
 	public boolean rawSetUnit(String registry, int x, int y, IUnit unit) throws RemoteException;
 	public boolean rawMoveUnit(String registry, int x, int y, int originalX, int originalY, IUnit unit) throws RemoteException;

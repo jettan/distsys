@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
+import distributed.systems.das.IServerBattleField;
 import distributed.systems.das.MessageRequest;
 import distributed.systems.core.IMessageReceivedHandler;
 import distributed.systems.core.Message;
@@ -77,7 +78,7 @@ public abstract class Unit implements IUnit {
 	 * this specific unit.
 	 * @throws RemoteException 
 	 */
-	public Unit(BattleField bf, Client client, int maxHealth, int attackPoints) throws RemoteException {
+	public Unit(Client client, int maxHealth, int attackPoints) throws RemoteException {
 		messageList = new ConcurrentHashMap<Integer, Message>();
 
 		// Initialize the max health and health
@@ -86,10 +87,10 @@ public abstract class Unit implements IUnit {
 		// Initialize the attack points
 		this.attackPoints = attackPoints;
 
-		// Get a new unit id
-		unitID = bf.getNewUnitID();
-
 		this.client = client;
+		
+		// Get a new unit id
+		unitID = getNewUnitID();
 		
 		EndPoint clientSocket = new EndPoint("D" + unitID);
 		try {
@@ -99,6 +100,18 @@ public abstract class Unit implements IUnit {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private int getNewUnitID(){
+		Allocation alloc = client.getAllocation();
+		EndPoint main = getBattlefieldFor(alloc.getMain());
+		try {
+			IServerBattleField remoteReceiver = (IServerBattleField) main.connect();
+			return remoteReceiver.getNewUnitID();
+		} catch (MalformedURLException | RemoteException | NotBoundException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 
 	/**

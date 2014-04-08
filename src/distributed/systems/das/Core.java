@@ -23,9 +23,9 @@ import distributed.systems.endpoints.condoresque.ExecutionMachine;
  * @author Pieter Anemaet, Boaz Pat-El
  */
 public class Core {
-	public static final int MIN_PLAYER_COUNT = 100;
-	public static final int MAX_PLAYER_COUNT = 100;
-	public static final int DRAGON_COUNT = 20;
+	public static final int MIN_PLAYER_COUNT = 10;
+	public static final int MAX_PLAYER_COUNT = 10;
+	public static final int DRAGON_COUNT = 5;
 	public static final int TIME_BETWEEN_PLAYER_LOGIN = 5000; // In milliseconds
 	
 	public static BattleField battlefield; 
@@ -93,7 +93,7 @@ public class Core {
 					try {
 						Client c = new Client(centralManagerEP);
 						c.connect();
-						new Dragon(battlefield, c, finalX, finalY);
+						new Dragon(c, finalX, finalY);
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}
@@ -129,7 +129,7 @@ public class Core {
 					try {
 						Client c = new Client(centralManagerEP);
 						c.connect();
-						new Player(battlefield, c, finalX, finalY);
+						new Player(c, finalX, finalY);
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}
@@ -180,7 +180,7 @@ public class Core {
 							try {
 								Client c = new Client(centralManagerEP);
 								c.connect();
-								new Player(battlefield, c, finalX, finalY);
+								new Player(c, finalX, finalY);
 							} catch (RemoteException e) {
 								e.printStackTrace();
 							}
