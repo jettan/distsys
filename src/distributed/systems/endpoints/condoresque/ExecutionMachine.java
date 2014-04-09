@@ -32,6 +32,7 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	
 	private final transient EndPoint endpoint;
 	private final transient EndPoint centralManager;
+	private final transient int ourId;
 	
 	/**
 	 * Connect to the Central Manager and hook into our personal heartbeat thread.
@@ -42,13 +43,16 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	 */
 	public ExecutionMachine(EndPoint centralManager, EndPoint local) throws MalformedURLException,
 			RemoteException, NotBoundException, InstantiationException, AlreadyBoundException {
-		// We have to construct our super on the first line, so yeah
-		super(local, new EndPoint(centralManager.getHostName(), centralManager.getPort(), "REFEXMACHINE_" + ((ICentralManager) centralManager.connect()).requestMachineID()));
+		super(local);
 		
 		this.centralManager = centralManager;
 		
 		endpoint = local;
 		endpoint.open((IExecutionMachine) UnicastRemoteObject.exportObject(this, 0));
+		
+		ourId = ((ICentralManager) centralManager.connect()).requestMachineID();
+		String ourName = "REFEXMACHINE_" + ourId;
+		super.connect(new EndPoint(centralManager.getHostName(), centralManager.getPort(), ourName));
 	}
 	
 	/**
@@ -74,7 +78,7 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 		
 		setPayload(getTotalClients());
 		if (out != null)
-			return new EndPoint(localname);
+			return new EndPoint(endpoint.getHostName(), endpoint.getPort(), localname);
 		else
 			return null;
 	}
@@ -85,7 +89,7 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	private ReferenceClient addClientToList(List<ReferenceClient> list, String regname) throws RemoteException{
 		ReferenceClient out = null;
 		try {
-			list.add(new ReferenceClient(new EndPoint(regname), this));
+			list.add(new ReferenceClient(new EndPoint(endpoint.getHostName(), endpoint.getPort(), regname), this));
 			out = list.get(list.size()-1);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -133,13 +137,13 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 	}
 	
 	public EndPoint getBattlefieldReg(){
-		return new EndPoint(endpoint.getRegistryName()+"/BATTLEFIELD");
+		return new EndPoint(endpoint.getHostName(), endpoint.getPort(), endpoint.getRegistryName()+"/BATTLEFIELD");
 	}
 	
 	public EndPoint nextServerBattlefield(){
 		EndPoint raw = getBattlefieldReg();
 		try {
-			raw = ((ICentralManager) centralManager.connect()).nextMachine(endpoint.getRegistryName());
+			raw = ((ICentralManager) centralManager.connect()).nextMachine("EXECUTION_MACHINE_" + ourId);
 		} catch (RemoteException | MalformedURLException | NotBoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

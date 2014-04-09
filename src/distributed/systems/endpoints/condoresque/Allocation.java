@@ -38,6 +38,10 @@ public class Allocation implements Serializable, IHeartbeatMonitor {
 	}
 
 	public void createHeartbeats() throws MalformedURLException, RemoteException, NotBoundException{
+		System.out.println("SETTING UP CONNECTION TO SERVERS:");
+		System.out.println(main);
+		System.out.println(backup);
+		
 		mainmachine = (IExecutionMachine) main.connect();
 		backupmachine = (IExecutionMachine) backup.connect();
 		

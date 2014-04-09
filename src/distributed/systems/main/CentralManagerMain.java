@@ -32,8 +32,10 @@ public class CentralManagerMain {
 			try {
 				Thread.sleep(Long.parseLong(args[0]));
 			} catch (NumberFormatException | InterruptedException e1) {
-				Thread.sleep(300);	// Sleep for 5 minutes by default
+				Thread.sleep(300000);	// Sleep for 5 minutes by default
 			}
+		else
+			Thread.sleep(300000);	// Sleep for 5 minutes by default
 		
 		try {
 			java.rmi.server.UnicastRemoteObject.unexportObject(reg,true);

@@ -56,7 +56,8 @@ public class EndPoint implements Serializable{
 	public <T extends Remote> void open(T r) throws MalformedURLException, RemoteException, AlreadyBoundException, InstantiationException{
 		if (!"localhost".equals(host))
 			throw new InstantiationException("Tried to open a registry on a remote host");
-		Naming.bind(registry, r);
+		System.out.println("OPENING REGISTRY: " + getURI());
+		Naming.bind(getURI(), r);
 	}
 	
 	public void close() throws RemoteException, MalformedURLException{

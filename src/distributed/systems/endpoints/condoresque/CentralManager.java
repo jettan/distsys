@@ -111,6 +111,9 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 	 */
 	@Override
 	public EndPoint nextMachine(String myName) throws RemoteException {
+		System.out.println("REQUESTED NEXT MACHINE FOR: " + myName);
+		for (String name :ringMap.keySet())
+			System.out.println("KNOWN: " + name);
 		return ringMap.get(myName).getRemoteHost();
 	}
 
@@ -125,6 +128,7 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 			rem.setMonitor(this);
 			machines.add(rem);
 			addLastMachineToRing();
+			System.out.println("REGISTERED EXECUTION MACHINE " + rem.getRemoteName());
 		} catch (MalformedURLException | InstantiationException
 				| AlreadyBoundException e) {
 			// TODO Auto-generated catch block
@@ -144,6 +148,8 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 					break;
 				}	
 			}
+			if (delme == null)
+				return;
 			machines.remove(delme);
 			removeMachineFromRing(delme);
 		}

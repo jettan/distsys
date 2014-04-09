@@ -12,11 +12,11 @@ import distributed.systems.endpoints.condoresque.Client;
 
 public class ClientMain {
 
-	public static void main(String[] args){
+	public static void main(String[] args) throws InterruptedException{
 		Registry reg = null;
 		
 		try {
-			reg = java.rmi.registry.LocateRegistry.createRegistry(1099);
+			reg = java.rmi.registry.LocateRegistry.createRegistry(1101);
 		} catch (RemoteException e) {
 			System.err.println("Fatal error: could not create registry!");
 			e.printStackTrace();
@@ -27,8 +27,15 @@ public class ClientMain {
 		
 		final EndPoint centralManagerEP = new EndPoint(centralManagerIP, 1099, "CENTRAL_MANAGER");
 		
+		System.out.println("STARTING CLIENT AS " + type);
+		System.out.println("CENTRAL MANAGER: " + centralManagerEP);
+
 		Client c = new Client(centralManagerEP);
-		c.connect();
+		if (!c.connect()){
+			System.err.println("FAILED TO CONNECT TO CENTRAL MANAGER, ABORTING");
+			return;
+		}
+	
 		boolean placed = false;
 		for (int i = 0; i < 200; i++){
 			try{
@@ -47,6 +54,15 @@ public class ClientMain {
 			c.disconnect();
 			System.err.println("Failed to place unit, aborting");
 		}
+		
+		if (args.length > 2)
+			try {
+				Thread.sleep(Long.parseLong(args[2]));
+			} catch (NumberFormatException | InterruptedException e1) {
+				Thread.sleep(120000);	// Sleep for 2 minutes by default
+			}
+		else
+			Thread.sleep(120000);	// Sleep for 5 minutes by default
 		
 		try {
 			java.rmi.server.UnicastRemoteObject.unexportObject(reg,true);

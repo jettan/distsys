@@ -4,9 +4,9 @@ import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import distributed.systems.core.IMessageReceivedHandler;
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.das.units.IUnit;
 import distributed.systems.endpoints.EndPoint;
@@ -23,6 +23,7 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	private EndPoint registry;
 	
 	private int unitid = 0;
+	private Lock idLock = new ReentrantLock();
 	
 	public ServerBattleField(ExecutionMachine machine, int width, int height) throws RemoteException, AlreadyAssignedIDException, MalformedURLException, InstantiationException, AlreadyBoundException{
 		super(width, height);
@@ -41,12 +42,15 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	 * @return int: a new unique unit ID.
 	 */
 	public int getNewUnitID() {
+		int result = 0;
+		idLock.lock();
 		try {
-			return getNewUnitID(registry.getRegistryName());
+			result = getNewUnitID(registry.getRegistryName());
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		return 0;
+		idLock.unlock();
+		return result;
 	}
 	
 	/**
