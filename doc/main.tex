@@ -127,7 +127,7 @@ As soon as a heartbeat is not received anymore from that particular component, w
 
 To get a scalable design in terms of server state synchronization we have utilized a unidirectional ring.
 This allows us to handle servers being added and dropped rather easily, as only one existing machine in the ring
-will need to be updated for each of these events.
+will need to be updated for each of these events. An overview of the resulting system can be found in \autoref{fig:serverring}.
 
 \begin{figure}[h]
     \centering
