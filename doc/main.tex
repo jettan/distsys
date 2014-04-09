@@ -19,6 +19,7 @@
 \usepackage{rotating}
 \usepackage{amsmath}
 \usepackage{tablefootnote}
+\usepackage{soul}
 \restylefloat{table}
 \usetikzlibrary{arrows,automata}
 
@@ -41,7 +42,7 @@
 				\begin{flushleft} \large
 					\emph{Authors:}\\
 					\begin{tabular}{l}
-						Q. Stokkink (xxxxxxx) \\
+						Q. Stokkink (4016270) \\
 						J.E.T. Tan (4032918)\\
 					\end{tabular}
 				\end{flushleft}
@@ -105,13 +106,15 @@ To implement a distributed game engine of DAS, the following requirements have b
 \label{sec:design}
 
 In this section, we will present our design of the system.
-To meet the scalability requirements, we have chosen to adapt a Condor-like architecture (add cite here).
+To meet the scalability requirements, we have chosen to adapt a Condor-like architecture for load balancing \hl{add cite here}.
+This involves servers advertising their number of connected clients to the \emph{central manager}.
 
+A \emph{client} initially connects to a central manager to get an allocation of two \emph{execution machines} which will further handle all requests from this client.
+The central manager only keeps track of the total amount of clients connected throughout the whole system by monitoring the advertisements of the execution machines.
+If one of the two execution machines of a client crashes, the other (backup) execution machine will allow the client to keep operating as usuall.
+A new server is then allocated for the client so it once again has two servers to fall back on.
+In the event both servers go down at once, the client will experience a short desynchronization.
 
-A \emph{client} initially connects to a \emph{central manager} to get an allocation of two \emph{execution machines} which will further handle all requests from this client.
-The central manager only keeps track of the total amount of clients connected throughout the whole system by asking this to the execution machines.
-If one of the two execution machines of a client crashes, the other (backup) execution machine will continue operating as usual.
-When the crashed execution machine has restarted, the execution machine that picked up all the tasks will replicate itself to this restarted execution machine.
 One might think that relying on a central component like the central manager makes the system have single point of failure,
 as opposed to the original Condor architecture, which also include submission machines.
 In the Condor architecture, the central manager acts like a \emph{matchmaker} and matches jobs with machines.
@@ -119,7 +122,19 @@ It would then notify the submission machine that in turn starts a shadow process
 In our architecture, we completely skip the steps involving the submission machine and let the client start its job on the allocated execution machines.
 
 Each component of the system (central manager, execution machines and client) has a \emph{heartbeat} to let the rest system know that he is still alive.
+This heartbeat is organized hierarchically so that there is no single overloaded point in the system.
 As soon as a heartbeat is not received anymore from that particular component, we know that component has crashed.
+
+To get a scalable design in terms of server state synchronization we have utilized a unidirectional ring.
+This allows us to handle servers being added and dropped rather easily, as only one existing machine in the ring
+will need to be updated for each of these events.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.25]{serverring.png}
+    \caption{Condor mapped to a server ring}
+    \label{fig:serverring}
+\end{figure}
 
 \section{Experimental Results}
 \label{sec:results}
