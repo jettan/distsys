@@ -136,13 +136,28 @@ will need to be updated for each of these events. An overview of the resulting s
     \label{fig:serverring}
 \end{figure}
 
+The final highlight of our design is that units are stored decentralized.
+This means that units use peer-to-peer communication as much as possible for trivial communication (like retrieving the health or type of another unit).
+For game critical decisions (like movement or attacking) the server will have to be asked for permission though.
+
 \section{Experimental Results}
 \label{sec:results}
 Here we present our experimental results.
 
 \section{Discussion}
 \label{sec:discussion}
-Discuss main findings!
+The first thing we note is that even though the central manager does not do any of the heavy lifting data-wise, it is a central point of failure.
+So even though it scales well, we are not completely happy with it.
+
+Secondly even though the unidirectional ring structure for the execution machines is very scalable and simple to understand,
+it comes with a notable performance hit.
+To illustrate this: on a single machine utilizing five servers in our distributed structure is about three times as slow as a single server threaded RMI implementation.
+In theory our design should outperform the single server solution due to sheer load though (even though we have not hit this point yet).
+
+The third thing that we would like to discuss is the load balancing with a dynamic set of servers.
+When a server drops the Condor-like load balancing makes sure that the servers receive an equal load of clients.
+However, when a new server is added/reconnects it will not balance out the system immediately.
+Instead it will simply take in all the new clients and very slowly distribute the load again over time.
 
 \section{Conclusion}
 \label{sec:conclusion}
