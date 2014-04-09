@@ -1,5 +1,7 @@
 package distributed.systems.das;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
@@ -25,9 +27,13 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	private int unitid = 0;
 	private Lock idLock = new ReentrantLock();
 	
+	private int logline = 0;
+	
 	public ServerBattleField(ExecutionMachine machine, int width, int height) throws RemoteException, AlreadyAssignedIDException, MalformedURLException, InstantiationException, AlreadyBoundException{
 		super(width, height);
 		this.machine = machine;
+		
+		clearLog();
 		
 		registry = machine.getBattlefieldReg();
 		registry.open(this);
@@ -87,7 +93,8 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	
 	public boolean rawSetUnit(int x, int y, IUnit unit){
 		try {
-			return rawSetUnit(registry.getRegistryName(), x, y, unit);
+			boolean b = rawSetUnit(registry.getRegistryName(), x, y, unit);
+			return b;
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -124,6 +131,7 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 		 */
 		if (remote.rawSetUnit(registry, x, y, unit)){
 			super.rawSetUnit(x, y, unit);
+			writeLog("D" + unit.getUnitID(), "SPAWN(" +  x + "," + y  + ")", "Game");
 			return true;
 		} else {
 			return false;
@@ -132,7 +140,8 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	
 	public boolean rawMoveUnit(int x, int y, int originalX, int originalY, IUnit unit){
 		try {
-			return rawMoveUnit(registry.getRegistryName(), x, y, originalX, originalY, unit);
+			boolean b = rawMoveUnit(registry.getRegistryName(), x, y, originalX, originalY, unit);
+			return b;
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -170,6 +179,7 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 		 */
 		if (remote.rawMoveUnit(registry, x, y, originalX, originalY, unit)){
 			super.rawMoveUnit(x, y, originalX, originalY, unit);
+			writeLog("D" + unit.getUnitID(), "MOVED((" + originalX + "," + originalY + ")->(" +  x + "," + y  + "))", "Game");
 			return true;
 		} else {
 			return false;
@@ -187,6 +197,7 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	@Override
 	public void addUnit(String registry, IUnit unit) throws RemoteException{
 		super.addUnit(unit);
+		writeLog("D" + unit.getUnitID(), "ADDED", "Session");
 		/**
 		 * Get the next server in the ring
 		 */
@@ -217,6 +228,7 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	@Override
 	public void removeUnit(String registry, IUnit unit) throws RemoteException{
 		super.removeUnit(unit);
+		writeLog("D" + unit.getUnitID(), "REMOVED", "Session");
 		/**
 		 * Get the next server in the ring
 		 */
@@ -234,6 +246,34 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 			remote.removeUnit(registry, unit);
 		}
 	}
-
 	
+	@Override
+	public void adjustedHitpoints(int unitid, int value){
+		writeLog("D" + unitid, "HEALTH(" + value + ")", "Game");
+	}
+	
+	private void clearLog(){
+		try {
+			FileWriter fw = new FileWriter(machine.getOurId() + ".gametrace", false);
+			fw.write("");
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private synchronized void writeLog(String player, String event, String category){
+		try {
+			FileWriter fw = new FileWriter(machine.getOurId() + ".gametrace", true);
+			fw.write(logline + ", " + 
+					player + ", " + 
+					System.currentTimeMillis() + ", " + 
+					event + ", " + 
+					category + "\r\n");
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		logline++;
+	}
 }

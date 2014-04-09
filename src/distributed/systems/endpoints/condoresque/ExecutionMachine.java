@@ -55,6 +55,10 @@ public class ExecutionMachine extends HeartbeatSender implements IExecutionMachi
 		super.connect(new EndPoint(centralManager.getHostName(), centralManager.getPort(), ourName));
 	}
 	
+	public int getOurId(){
+		return ourId;
+	}
+	
 	/**
 	 * Register the calling client on this Execution machine.
 	 * Communicate the new amount of clients to the Central Manager.

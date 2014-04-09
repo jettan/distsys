@@ -276,6 +276,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				if (unit != null)
 					try {
 						unit.adjustHitPoints( -(Integer)msg.get("damage") );
+						adjustedHitpoints(unit.getUnitID(), -(Integer)msg.get("damage"));
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}
@@ -293,6 +294,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 				if (unit != null)
 					try {
 						unit.adjustHitPoints( (Integer)msg.get("healed") );
+						adjustedHitpoints(unit.getUnitID(), (Integer)msg.get("healed"));
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}
@@ -399,4 +401,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		}
 	}
 	
+	public void adjustedHitpoints(int unit, int amount){
+		
+	}
 }
