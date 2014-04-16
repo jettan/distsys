@@ -26,6 +26,8 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	
 	private int unitid = 0;
 	private Lock idLock = new ReentrantLock();
+	private Lock setLock = new ReentrantLock();
+	private Lock moveLock = new ReentrantLock();
 	
 	private int logline = 0;
 	
@@ -49,13 +51,13 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	 */
 	public int getNewUnitID() {
 		int result = 0;
-		idLock.lock();
 		try {
+			idLock.lock();
 			result = getNewUnitID(registry.getRegistryName());
+			idLock.unlock();
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		idLock.unlock();
 		return result;
 	}
 	
@@ -72,13 +74,17 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 		} catch (MalformedURLException | NotBoundException e) {
 			throw new RemoteException();
 		}
+		
 		/**
 		 * If we have gone full circle, give our own suggestion
 		 */
 		if (registry.equals(remote.getName())){
+			idLock.lock();
 			unitid++;
+			idLock.unlock();
 			return unitid;
 		}
+		
 		/**
 		 * If someone else has a higher unitid, we need to adapt to
 		 * it (Scalar Clock technique)
@@ -93,8 +99,7 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	
 	public boolean rawSetUnit(int x, int y, IUnit unit){
 		try {
-			boolean b = rawSetUnit(registry.getRegistryName(), x, y, unit);
-			return b;
+			return rawSetUnit(registry.getRegistryName(), x, y, unit);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -116,22 +121,43 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 		 */
 		if (registry.equals(remote.getName())){
 			if (isEmpty(x,y)){
-				super.rawSetUnit(x, y, unit);
-				return true;
-			} else
+				setLock.lock();
+				boolean response = super.rawSetUnit(x, y, unit);
+				setLock.unlock();
+				if (response)
+				if (unit != null)
+					writeLog("D" + unit.getUnitID(), "SPAWN(" +  x + "," + y  + ")", "Game");
+				else {
+					IUnit punit = rawGetUnit(x,y);
+					if (punit != null)
+						writeLog("D" + punit.getUnitID(), "REMOVE("  +  x + "," + y  + ")", "Game");
+				}
+				return response;
+			} else {
 				return false;
+			}
 		}
 		/**
 		 * If we cannot allow this move, roll back
 		 */
-		if (!isEmpty(x,y))
+		if (!isEmpty(x,y)){
 			return false;
+		}
 		/**
 		 * If everyone allows this move, commit
 		 */
 		if (remote.rawSetUnit(registry, x, y, unit)){
+			setLock.lock();
 			super.rawSetUnit(x, y, unit);
-			writeLog("D" + unit.getUnitID(), "SPAWN(" +  x + "," + y  + ")", "Game");
+			setLock.unlock();
+			
+			if (unit != null)
+				writeLog("D" + unit.getUnitID(), "SPAWN(" +  x + "," + y  + ")", "Game");
+			else {
+				IUnit punit = rawGetUnit(x,y);
+				if (punit != null)
+					writeLog("D" + punit.getUnitID(), "REMOVE("  +  x + "," + y  + ")", "Game");
+			}
 			return true;
 		} else {
 			return false;
@@ -140,8 +166,7 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	
 	public boolean rawMoveUnit(int x, int y, int originalX, int originalY, IUnit unit){
 		try {
-			boolean b = rawMoveUnit(registry.getRegistryName(), x, y, originalX, originalY, unit);
-			return b;
+			return rawMoveUnit(registry.getRegistryName(), x, y, originalX, originalY, unit);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -164,10 +189,15 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 		 */
 		if (registry.equals(remote.getName())){
 			if (isEmpty(x,y)){
-				super.rawMoveUnit(x, y, originalX, originalY, unit);
-				return true;
-			}else
+				moveLock.lock();
+				boolean response = super.rawMoveUnit(x, y, originalX, originalY, unit);
+				moveLock.unlock();
+				if (response)
+					writeLog("D" + unit.getUnitID(), "MOVED((" + originalX + "," + originalY + ")->(" +  x + "," + y  + "))", "Game");
+				return response;
+			}else{
 				return false;
+			}
 		}
 		/**
 		 * If we cannot allow this move, roll back
@@ -178,9 +208,12 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 		 * If everyone allows this move, commit
 		 */
 		if (remote.rawMoveUnit(registry, x, y, originalX, originalY, unit)){
-			super.rawMoveUnit(x, y, originalX, originalY, unit);
-			writeLog("D" + unit.getUnitID(), "MOVED((" + originalX + "," + originalY + ")->(" +  x + "," + y  + "))", "Game");
-			return true;
+			moveLock.lock();
+			boolean response = super.rawMoveUnit(x, y, originalX, originalY, unit);
+			moveLock.unlock();
+			if (response)
+				writeLog("D" + unit.getUnitID(), "MOVED((" + originalX + "," + originalY + ")->(" +  x + "," + y  + "))", "Game");
+			return response;
 		} else {
 			return false;
 		}
@@ -251,7 +284,7 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 	public void adjustedHitpoints(int unitid, int value){
 		writeLog("D" + unitid, "HEALTH(" + value + ")", "Game");
 	}
-	
+
 	private void clearLog(){
 		try {
 			FileWriter fw = new FileWriter(machine.getOurId() + ".gametrace", false);
@@ -276,4 +309,5 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 		}
 		logline++;
 	}
+
 }

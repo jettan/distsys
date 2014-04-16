@@ -81,52 +81,54 @@ public class BattleFieldViewer extends JPanel implements Runnable {
 				|| doubleBufferGraphics == null)
 			initDB();
 
-		/* Fill the background */
-		//doubleBufferGraphics.setColor(Color.GREEN);
-		doubleBufferGraphics.clearRect(0, 0, bufferWidth, bufferHeight);
-		doubleBufferGraphics.setColor(Color.BLACK);
-
 		/* Draw the field, rectangle-wise */
 		for(int i = 0; i < BattleField.MAP_WIDTH; i++, x += xRatio, y = 0)
 			for(int j = 0; j < BattleField.MAP_HEIGHT; j++, y += yRatio) {
+				// Optimization: 70% chance we don't draw :D
+				if (Math.random()>0.3)
+					continue;
+				
 				u = bf.getUnit(i, j);
-				if (u == null) continue; // Nothing to draw in this sector
-
+				UnitType type = UnitType.undefined;
+				int id = -1;
+				double health = 0.0d;
+					
+				if (u == null){
+					doubleBufferGraphics.setColor(Color.WHITE);
+					doubleBufferGraphics.fillRect((int)x, (int)y, (int)xRatio, (int)yRatio);
+					continue; // Nothing to draw in this sector
+				}
+				
 				try {
-					if (u.getMyType() == UnitType.dragon)
-						doubleBufferGraphics.setColor(Color.RED);
-					else if (u.getMyType() == UnitType.player)
-						doubleBufferGraphics.setColor(Color.BLUE);
+					type = u.getMyType();
+					id = u.getUnitID();
+					health = (double)yRatio * u.getHitPoints() / (double)u.getMaxHitPoints();
 				} catch (RemoteException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
+					continue;
 				}
 
+				if (type == UnitType.dragon)
+					doubleBufferGraphics.setColor(Color.RED);
+				else if (type == UnitType.player)
+					doubleBufferGraphics.setColor(Color.BLUE);
+				
+
 				/* Fill the unit color */
-				doubleBufferGraphics.fillRect((int)x + 1, (int)y + 1, (int)xRatio - 1, (int)yRatio - 1);
+				doubleBufferGraphics.fillRect((int)x + 1, (int)y + 1, (int)xRatio - 2, (int)yRatio - 2);
 				
 				/* Draw healthbar */
 				doubleBufferGraphics.setColor(Color.GREEN);
-				try {
-					filler = (double)yRatio * u.getHitPoints() / (double)u.getMaxHitPoints();
-				} catch (RemoteException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				doubleBufferGraphics.fillRect((int)(x + 0.75 * xRatio), (int)(y + 1 + yRatio - filler), (int)xRatio / 4, (int)(filler));
+				filler = health;
+				doubleBufferGraphics.fillRect((int)(x + 0.75 * xRatio), (int)(y + 1 + yRatio - filler), (int)xRatio / 4, (int)(filler)-2);
 
 				/* Draw the identifier */
 				doubleBufferGraphics.setColor(Color.WHITE);
-				try {
-					doubleBufferGraphics.drawString("" + u.getUnitID(), (int)x, (int)y + 15);
-				} catch (RemoteException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				doubleBufferGraphics.drawString("" + id, (int)x, (int)y + 15);
 				doubleBufferGraphics.setColor(Color.BLACK);
 
 				/* Draw a rectangle around the unit */
-				doubleBufferGraphics.drawRect((int)x, (int)y, (int)xRatio, (int)yRatio);
+				doubleBufferGraphics.drawRect((int)x, (int)y, (int)xRatio-1, (int)yRatio-1);
 			}
 
 		/* Flip the double buffer */

@@ -11,12 +11,8 @@ import distributed.systems.das.units.Unit.UnitType;
 import distributed.systems.das.units.IUnit;
 import distributed.systems.core.IMessageReceivedHandler;
 import distributed.systems.core.Message;
-import distributed.systems.core.Socket;
-import distributed.systems.core.SynchronizedSocket;
 import distributed.systems.core.exception.AlreadyAssignedIDException;
-import distributed.systems.core.exception.IDNotAssignedException;
 import distributed.systems.endpoints.EndPoint;
-import distributed.systems.example.LocalSocket;
 
 /**
  * The actual battlefield where the fighting takes place.
@@ -54,11 +50,8 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * @throws AlreadyAssignedIDException 
 	 */
 	public BattleField(int width, int height) throws RemoteException, AlreadyAssignedIDException {
-		synchronized (this) {
-			map = new IUnit[width][height];
-			units = new ArrayList<IUnit>();
-		}
-		
+		map = new IUnit[width][height];
+		units = new ArrayList<IUnit>();
 	}
 	
 	/**
@@ -76,17 +69,17 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 */
 	private boolean spawnUnit(IUnit unit, int x, int y)
 	{
-		synchronized (this) {
-			if (map[x][y] != null)
-				return false;
-	
-			rawSetUnit(x, y, unit);
-			try {
-				unit.setPosition(x, y);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
+		if (map[x][y] != null)
+			return false;
+
+		rawSetUnit(x, y, unit);
+
+		try {
+			unit.setPosition(x, y);
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
+
 		addUnit(unit);
 
 		return true;
@@ -104,7 +97,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * @return true when the unit has been put on the 
 	 * specified position.
 	 */
-	private synchronized boolean putUnit(IUnit unit, int x, int y)
+	private boolean putUnit(IUnit unit, int x, int y)
 	{
 		if (map[x][y] != null)
 			return false;
@@ -151,7 +144,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * 
 	 * @return true on success.
 	 */
-	private synchronized boolean moveUnit(IUnit unit, int newX, int newY)
+	private boolean moveUnit(IUnit unit, int newX, int newY)
 	{
 		int originalX = -1;
 		try {
@@ -195,7 +188,7 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * @param x position.
 	 * @param y position.
 	 */
-	private synchronized void removeUnit(int x, int y)
+	private void removeUnit(int x, int y)
 	{
 		IUnit unitToRemove = map[x][y];
 		if (unitToRemove == null)
@@ -217,9 +210,25 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 		return ++lastUnitID;
 	}
 
-	public void onMessageReceived(Message msg) {
+	public void onMessageReceived(Message msg) throws RemoteException{
+		try {
+			final EndPoint client = new EndPoint(RemoteServer.getClientHost(), 1099, (String)msg.get("origin"));
+			final Message fwd = msg;
+			Thread t = new Thread(new Runnable(){
+				@Override
+				public void run() {
+					onMessageReceived(fwd, client);
+				}
+			});
+			t.start();
+		} catch (ServerNotActiveException e) {
+			e.printStackTrace();
+			throw new RemoteException();
+		}
+	}
+	
+	public void onMessageReceived(final Message msg, final EndPoint ep) {
 		Message reply = new Message();
-		String origin = (String)msg.get("origin");
 		MessageRequest request = (MessageRequest)msg.get("request");
 		IUnit unit;
 		switch(request)
@@ -320,26 +329,20 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 			}
 		}
 
-		try {
-			if (reply != null) {
-				final EndPoint ep = new EndPoint(RemoteServer.getClientHost(), 1099, origin);
-				final Message freply = reply;
-				Thread t = new Thread(new Runnable(){
-					@Override
-					public void run() {
-						try {
-							IMessageReceivedHandler imrh = (IMessageReceivedHandler) ep.connect();
-							imrh.onMessageReceived(freply);
-						} catch (RemoteException | MalformedURLException | NotBoundException e) {
-							e.printStackTrace();
-						}
+		if (reply != null) {
+			final Message freply = reply;
+			Thread t = new Thread(new Runnable(){
+				@Override
+				public void run() {
+					try {
+						IMessageReceivedHandler imrh = (IMessageReceivedHandler) ep.connect();
+						imrh.onMessageReceived(freply);
+					} catch (RemoteException | MalformedURLException | NotBoundException e) {
+						e.printStackTrace();
 					}
-				});
-				t.start();
-			}
-		}
-		catch(ServerNotActiveException idnae)  {
-			// Could happen if the target already logged out
+				}
+			});
+			t.start();
 		}
 	}
 
@@ -348,18 +351,20 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	 * the serverSocket so the program can 
 	 * actually end.
 	 */ 
-	public synchronized void shutdown() {
+	public void shutdown() {
 		// Remove all units from the battlefield and make them disconnect from the server
-		for (IUnit unit : units) {
-			try {
-				unit.disconnect();
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-			try {
-				unit.stopRunnerThread();
-			} catch (RemoteException e) {
-				e.printStackTrace();
+		synchronized(units){
+			for (IUnit unit : units) {
+				try {
+					unit.disconnect();
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+				try {
+					unit.stopRunnerThread();
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -403,5 +408,9 @@ public class BattleField extends UnicastRemoteObject implements IMessageReceived
 	
 	public void adjustedHitpoints(int unit, int amount){
 		
+	}
+
+	public IUnit rawGetUnit(int x, int y) {
+		return map[x][y];
 	}
 }

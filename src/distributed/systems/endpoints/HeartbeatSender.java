@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
 
 public class HeartbeatSender implements Runnable{
 
-	private final static long BEAT_TIME = 100;
+	private final static long BEAT_TIME = 500;
 
 	private final EndPoint local;
 	

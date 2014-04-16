@@ -8,7 +8,6 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import distributed.systems.das.BattleField;
 import distributed.systems.das.GameState;
 import distributed.systems.das.IServerBattleField;
 import distributed.systems.das.MessageRequest;
@@ -259,11 +258,13 @@ public abstract class Unit implements IUnit {
 		spawnMessage.put("origin", "D" + unitID);
 		
 		// Send a spawn message
-		if (!sendMessage(spawnMessage))
+		if (!sendAndWait(spawnMessage))
 			return false;
 		
+		Message response = messageList.remove(id);
+
 		// Wait for the unit to be placed
-		return getUnit(x, y) != null;
+		return (Boolean) response.get("committed");
 	}
 	
 	/**
@@ -303,14 +304,14 @@ public abstract class Unit implements IUnit {
 		getMessage.put("y", y);
 		getMessage.put("id", id);
 		getMessage.put("origin", "D" + unitID);
-
+		
 		// Send the getUnit message
 		if (!sendAndWait(getMessage))
 			return null;
 		
 		result = messageList.get(id);
 		messageList.remove(id);
-
+		
 		return (IUnit) result.get("unit");	
 	}
 
@@ -423,9 +424,11 @@ public abstract class Unit implements IUnit {
 			}
 
 			// Quit if the game window has closed
-			if (!GameState.getRunningState())
+			if (!GameState.getRunningState()){
 				return false;
+			}
 		}
+		
 		return true;
 	}
 }

@@ -6,9 +6,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -111,9 +109,6 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 	 */
 	@Override
 	public EndPoint nextMachine(String myName) throws RemoteException {
-		System.out.println("REQUESTED NEXT MACHINE FOR: " + myName);
-		for (String name :ringMap.keySet())
-			System.out.println("KNOWN: " + name);
 		return ringMap.get(myName).getRemoteHost();
 	}
 

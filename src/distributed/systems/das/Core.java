@@ -3,7 +3,6 @@ package distributed.systems.das;
 import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
 
 import distributed.systems.core.exception.AlreadyAssignedIDException;
 import distributed.systems.das.presentation.BattleFieldViewer;
@@ -23,9 +22,9 @@ import distributed.systems.endpoints.condoresque.ExecutionMachine;
  * @author Pieter Anemaet, Boaz Pat-El
  */
 public class Core {
-	public static final int MIN_PLAYER_COUNT = 10;
-	public static final int MAX_PLAYER_COUNT = 10;
-	public static final int DRAGON_COUNT = 5;
+	public static final int MIN_PLAYER_COUNT = 100;
+	public static final int MAX_PLAYER_COUNT = 100;
+	public static final int DRAGON_COUNT = 50;
 	public static final int TIME_BETWEEN_PLAYER_LOGIN = 5000; // In milliseconds
 	
 	public static BattleField battlefield; 
@@ -42,15 +41,9 @@ public class Core {
 			e.printStackTrace();
 		}
 		
-		try {
-			battlefield = new BattleField(BattleField.MAP_WIDTH, BattleField.MAP_HEIGHT);
-		} catch (RemoteException | AlreadyAssignedIDException e2) {
-			e2.printStackTrace();
-		}
-		
 		final EndPoint centralManagerEP = new EndPoint("CENTRAL_MANAGER");
 		try {
-			CentralManager cm = new CentralManager(centralManagerEP);
+			new CentralManager(centralManagerEP);
 		} catch (MalformedURLException | RemoteException
 				| InstantiationException | AlreadyBoundException e2) {
 			e2.printStackTrace();
@@ -67,6 +60,13 @@ public class Core {
 				e.printStackTrace();
 			}
 		}
+		
+		/* Spawn a new battlefield viewer */
+		new Thread(new Runnable() {
+			public void run() {
+				new BattleFieldViewer(battlefield);
+			}
+		}).start();
 
 		/* All the dragons connect */
 		for(int i = 0; i < DRAGON_COUNT; i++) {
@@ -76,7 +76,7 @@ public class Core {
 				x = (int)(Math.random() * BattleField.MAP_WIDTH);
 				y = (int)(Math.random() * BattleField.MAP_HEIGHT);
 				attempt++;
-			} while (battlefield.getUnit(x, y) != null && attempt < 10);
+			} while (battlefield.getUnit(x, y) != null && attempt < 20);
 
 			// If we didn't find an empty spot, we won't add a new dragon
 			if (battlefield.getUnit(x, y) != null) break;
@@ -88,18 +88,14 @@ public class Core {
 			 * thread, making sure it does not 
 			 * block the system.
 			 */
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						Client c = new Client(centralManagerEP);
-						c.connect();
-						new Dragon(c, finalX, finalY);
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-
+			try {
+				Client c = new Client(centralManagerEP);
+				c.connect();
+				new Dragon(c, finalX, finalY);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				i--;
+			}
 		}
 
 		/* Initialize a random number of players (between [MIN_PLAYER_COUNT..MAX_PLAYER_COUNT] */
@@ -112,7 +108,7 @@ public class Core {
 				x = (int)(Math.random() * BattleField.MAP_WIDTH);
 				y = (int)(Math.random() * BattleField.MAP_HEIGHT);
 				attempt++;
-			} while (battlefield.getUnit(x, y) != null && attempt < 10);
+			} while (battlefield.getUnit(x, y) != null && attempt < 20);
 
 			// If we didn't find an empty spot, we won't add a new player
 			if (battlefield.getUnit(x, y) != null) break;
@@ -124,26 +120,17 @@ public class Core {
 			 * thread, making sure it does not 
 			 * block the system.
 			 */
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						Client c = new Client(centralManagerEP);
-						c.connect();
-						new Player(c, finalX, finalY);
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-			
+			try {
+				Client c = new Client(centralManagerEP);
+				c.connect();
+				new Player(c, finalX, finalY);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				i--;
+			}
 		}
 
-		/* Spawn a new battlefield viewer */
-		new Thread(new Runnable() {
-			public void run() {
-				new BattleFieldViewer(battlefield);
-			}
-		}).start();
+		System.out.println("Finished initial battlefield deployment!");
 		
 		/* Add a random player every (5 seconds x GAME_SPEED) so long as the
 		 * maximum number of players to enter the battlefield has not been exceeded. 
@@ -175,18 +162,13 @@ public class Core {
 					 * thread, making sure it does not 
 					 * block the system.
 					 */
-					new Thread(new Runnable() {
-						public void run() {
-							try {
-								Client c = new Client(centralManagerEP);
-								c.connect();
-								new Player(c, finalX, finalY);
-							} catch (RemoteException e) {
-								e.printStackTrace();
-							}
-						}
-					}).start();
-					playerCount++;
+					try {
+						Client c = new Client(centralManagerEP);
+						c.connect();
+						new Player(c, finalX, finalY);
+						playerCount++;
+					} catch (RemoteException e) {
+					}
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();

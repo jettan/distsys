@@ -27,7 +27,7 @@ public class HeartbeatReceiver implements IHeartbeatReceiver{
 	 * Failing to send the next heartbeat within this amount of millis
 	 * will result in missedBeat(long id) being called.
 	 */
-	private final static long TIMEOUT = 200;
+	private final static long TIMEOUT = 1000;
 	
 	private transient Waiter currentWaiter;
 	
