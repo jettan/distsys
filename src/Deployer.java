@@ -33,6 +33,7 @@ public class Deployer {
 		String line = buf.readLine();
 		while (line != null){
 			output += line;
+			line = buf.readLine();
 		}
 		
 		Scanner sc = new Scanner(output);
