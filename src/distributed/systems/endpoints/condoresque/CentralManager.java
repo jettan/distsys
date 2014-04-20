@@ -2,6 +2,7 @@ package distributed.systems.endpoints.condoresque;
 
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import distributed.systems.das.IServerBattleField;
 import distributed.systems.endpoints.EndPoint;
 import distributed.systems.endpoints.IHeartbeatMonitor;
 
@@ -220,5 +222,37 @@ public class CentralManager implements ICentralManager, IHeartbeatMonitor{
 			}
 		}
 		return out;
+	}
+	
+	/**
+	 * Do a safe system shutdown
+	 */
+	public void shutDown(){
+		synchronized(machines){
+			Iterator<ReferenceExecutionMachine> it = machines.iterator();
+			while (it.hasNext()){
+				ReferenceExecutionMachine rem = it.next();
+				EndPoint rep = rem.getRemoteHost();
+				EndPoint rbep = new EndPoint(rep.getHostName(), rep.getPort(), rep.getRegistryName()+"/BATTLEFIELD");
+				/*
+				 * Release all clients
+				 */
+				try{
+					IServerBattleField isbf = (IServerBattleField) rbep.connect();
+					isbf.shutdown();
+				} catch (RemoteException | MalformedURLException | NotBoundException e){
+					e.printStackTrace();
+				}
+				/*
+				 * Release this server
+				 */
+				try{
+					IExecutionMachine iem = (IExecutionMachine) rep.connect();
+					iem.kill();
+				} catch (RemoteException | MalformedURLException | NotBoundException e){
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

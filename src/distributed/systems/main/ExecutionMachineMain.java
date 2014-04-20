@@ -35,8 +35,10 @@ public class ExecutionMachineMain {
 		System.out.println("CENTRAL MANAGER: " + centralManagerEP);
 		System.out.println("LOCAL REGISTRY: " + ep);
 		
+		ExecutionMachine em = null;
+		
 		try {
-			ExecutionMachine em = new ExecutionMachine(centralManagerEP, ep);
+			em = new ExecutionMachine(centralManagerEP, ep);
 			new ServerBattleField(em, BattleField.MAP_WIDTH, BattleField.MAP_HEIGHT); // Viewing through one of two servers
 		} catch (MalformedURLException | RemoteException
 				| InstantiationException | NotBoundException
@@ -50,8 +52,12 @@ public class ExecutionMachineMain {
 			} catch (NumberFormatException | InterruptedException e1) {
 				Thread.sleep(240000);	// Sleep for 4 minutes by default
 			}
-		else
-			Thread.sleep(240000);	// Sleep for 4 minutes by default
+		else {
+			while (em.isAlive()){
+				Thread.sleep(2000);	// Sleep for two seconds and try to shut down again
+			}
+			System.out.println("We have been shut down");
+		}
 		
 		try {
 			java.rmi.server.UnicastRemoteObject.unexportObject(reg,true);

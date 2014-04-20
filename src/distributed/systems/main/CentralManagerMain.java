@@ -7,6 +7,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 
 import distributed.systems.endpoints.EndPoint;
+import distributed.systems.endpoints.condoresque.CentralManager;
 
 public class CentralManagerMain {
 
@@ -21,8 +22,9 @@ public class CentralManagerMain {
 		}
 		
 		final EndPoint centralManagerEP = new EndPoint("CENTRAL_MANAGER");
+		CentralManager cm = null;
 		try {
-			new distributed.systems.endpoints.condoresque.CentralManager(centralManagerEP);
+			cm = new CentralManager(centralManagerEP);
 		} catch (MalformedURLException | RemoteException
 				| InstantiationException | AlreadyBoundException e2) {
 			e2.printStackTrace();
@@ -34,8 +36,13 @@ public class CentralManagerMain {
 			} catch (NumberFormatException | InterruptedException e1) {
 				Thread.sleep(300000);	// Sleep for 5 minutes by default
 			}
-		else
-			Thread.sleep(300000);	// Sleep for 5 minutes by default
+		else {
+			while (!SysUtil.shouldShutDown()){
+				Thread.sleep(2000);	// Sleep for two seconds and try to shut down again
+			}
+			System.out.println("Shutdown requested, shutting down");
+			cm.shutDown();
+		}
 		
 		try {
 			java.rmi.server.UnicastRemoteObject.unexportObject(reg,true);

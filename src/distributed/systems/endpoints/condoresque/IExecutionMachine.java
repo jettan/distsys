@@ -15,4 +15,5 @@ public interface IExecutionMachine extends Remote, Serializable {
 	 */
 	public EndPoint addClient(boolean main) throws RemoteException;
 
+	public void kill() throws RemoteException;
 }
