@@ -79,7 +79,7 @@ public class Deployer {
 		}
 		
 		System.out.println("System fully deployed with:");
-		System.out.println("\t1 CentralManager");
+		System.out.println("\t1 CentralManager (" + cmip + ")");
 		System.out.println("\t" + EXECUTION_MACHINE_COUNT + " ExecutionMachine");
 		System.out.println("\t" + DRAGON_COUNT + " Client DRAGON");
 		System.out.println("\t" + PLAYER_COUNT + " Client PLAYER");
