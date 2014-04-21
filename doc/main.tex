@@ -2,7 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{textcomp}
 \usepackage{graphicx}
-\usepackage{caption}
+\usepackage[font=small,labelfont=bf]{caption}
 \usepackage{subcaption}
 %\usepackage{subfigure}
 \usepackage{parskip}
@@ -20,6 +20,7 @@
 \usepackage{amsmath}
 \usepackage{tablefootnote}
 \usepackage{soul}
+\usepackage{wrapfig}
 \restylefloat{table}
 \usetikzlibrary{arrows,automata}
 
@@ -125,16 +126,17 @@ Each component of the system (central manager, execution machines and client) ha
 This heartbeat is organized hierarchically so that there is no single overloaded point in the system.
 As soon as a heartbeat is not received anymore from that particular component, we know that component has crashed.
 
+\begin{wrapfigure}{r}{0.5\textwidth}
+    \begin{center}
+        \includegraphics[width=0.48\textwidth]{serverring.png}    
+    \end{center}
+    \caption{Condor mapped to a server ring}
+    \label{fig:serverring}
+\end{wrapfigure}
+
 To get a scalable design in terms of server state synchronization we have utilized a unidirectional ring.
 This allows us to handle servers being added and dropped rather easily, as only one existing machine in the ring
 will need to be updated for each of these events. An overview of the resulting system can be found in \autoref{fig:serverring}.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[scale=0.25]{serverring.png}
-    \caption{Condor mapped to a server ring}
-    \label{fig:serverring}
-\end{figure}
 
 The final highlight of our design is that units are stored decentralized.
 This means that units use peer-to-peer communication as much as possible for trivial communication (like retrieving the health or type of another unit).
