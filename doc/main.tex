@@ -21,6 +21,7 @@
 \usepackage{tablefootnote}
 \usepackage{soul}
 \usepackage{wrapfig}
+\usepackage{framed}
 \restylefloat{table}
 \usetikzlibrary{arrows,automata}
 
@@ -127,12 +128,15 @@ This heartbeat is organized hierarchically so that there is no single overloaded
 As soon as a heartbeat is not received anymore from that particular component, we know that component has crashed.
 
 \begin{wrapfigure}{r}{0.5\textwidth}
+\begin{framed}
     \begin{center}
-        \includegraphics[width=0.48\textwidth]{serverring.png}    
+        \includegraphics[width=\textwidth]{serverring.png}    
     \end{center}
     \caption{Condor mapped to a server ring}
     \label{fig:serverring}
+\end{framed}
 \end{wrapfigure}
+
 
 To get a scalable design in terms of server state synchronization we have utilized a unidirectional ring.
 This allows us to handle servers being added and dropped rather easily, as only one existing machine in the ring
