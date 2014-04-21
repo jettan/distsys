@@ -126,7 +126,7 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 				setLock.unlock();
 				if (response)
 				if (unit != null)
-					writeLog("D" + unit.getUnitID(), "SPAWN(" +  x + "," + y  + ")", "Game");
+					writeLog("D" + unit.getUnitID(), "SPAWN(" + unit.getMyType().ordinal() + "," + x + "," + y  + ")", "Game");
 				else {
 					IUnit punit = rawGetUnit(x,y);
 					if (punit != null)
@@ -152,7 +152,7 @@ public class ServerBattleField extends BattleField implements IServerBattleField
 			setLock.unlock();
 			
 			if (unit != null)
-				writeLog("D" + unit.getUnitID(), "SPAWN(" +  x + "," + y  + ")", "Game");
+				writeLog("D" + unit.getUnitID(), "SPAWN(" + unit.getMyType().ordinal() + "," + x + "," + y  + ")", "Game");
 			else {
 				IUnit punit = rawGetUnit(x,y);
 				if (punit != null)

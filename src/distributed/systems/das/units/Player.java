@@ -45,13 +45,13 @@ public class Player extends Unit implements Runnable, Serializable {
 		/* Create a random delay */
 		timeBetweenTurns = (int)(Math.random() * (MAX_TIME_BETWEEN_TURNS - MIN_TIME_BETWEEN_TURNS)) + MIN_TIME_BETWEEN_TURNS;
 
+		myType = UnitType.player;
+		
 		if (!spawn(x, y)){
 			System.err.println("Could not spawn player on location " + x + ", " + y + ".");
 			throw new RemoteException(); // We could not spawn on the battlefield
 		}
 
-		myType = UnitType.player;
-		
 		/* Create a new player thread */
 		runnerThread = new Thread(this);
 		runnerThread.start();

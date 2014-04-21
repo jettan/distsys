@@ -24,7 +24,7 @@ import distributed.systems.endpoints.condoresque.ExecutionMachine;
 public class Core {
 	public static final int MIN_PLAYER_COUNT = 100;
 	public static final int MAX_PLAYER_COUNT = 100;
-	public static final int DRAGON_COUNT = 10;
+	public static final int DRAGON_COUNT = 50;
 	public static final int TIME_BETWEEN_PLAYER_LOGIN = 5000; // In milliseconds
 	
 	public static BattleField battlefield; 
