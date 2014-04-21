@@ -6,7 +6,7 @@
 \usepackage{subcaption}
 %\usepackage{subfigure}
 \usepackage{parskip}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage{color}
 \usepackage{pdfpages}
 \usepackage{pgf}
@@ -106,7 +106,7 @@ To implement a distributed game engine of DAS, the following requirements have b
 \label{sec:design}
 
 In this section, we will present our design of the system.
-To meet the scalability requirements, we have chosen to adapt a Condor-like architecture for load balancing \hl{add cite here}.
+To meet the scalability requirements, we have chosen to adapt a Condor-like architecture for load balancing \cite{epema1996worldwide}.
 This involves servers advertising their number of connected clients to the \emph{central manager}.
 
 A \emph{client} initially connects to a central manager to get an allocation of two \emph{execution machines} which will further handle all requests from this client.
@@ -138,7 +138,25 @@ will need to be updated for each of these events. An overview of the resulting s
 
 The final highlight of our design is that units are stored decentralized.
 This means that units use peer-to-peer communication as much as possible for trivial communication (like retrieving the health or type of another unit).
-For game critical decisions (like movement or attacking) the server will have to be asked for permission though.
+For game critical decisions (like movement or attacking) the server will have to be asked for permission.
+The general overview of these event categories and their corresponding assertion levels is shown in \autoref{tab:categories}.
+
+\begin{table}
+\begin{tabular}{| l | l | l |}
+\hline
+\textbf{Category} & \textbf{Communication} & \textbf{Checked by} \\
+\hline
+\hline
+Move related & Server/Client & Full server ring synchronization \\
+\hline
+Player interaction & Server/Client & Single server validity check \\
+\hline
+Player information & Peer-to-Peer & No server intervention \\
+\hline
+\end{tabular}
+\caption{Event categories}
+\label{tab:categories}
+\end{table}
 
 \section{Experimental Results}
 \label{sec:results}
@@ -169,6 +187,7 @@ In this project...
 \subsection*{A - Time Sheet}
 \label{sec:appendix}
 
-
+\bibliographystyle{plain}
+\bibliography{bibliography}
 
 \end{document}
