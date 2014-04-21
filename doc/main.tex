@@ -166,6 +166,23 @@ Player information & Peer-to-Peer & No server intervention \\
 
 \section{Experimental Results}
 \label{sec:results}
+\begin{wrapfigure}{l}{0.5\textwidth}
+\begin{framed}
+    \begin{center}
+        \includegraphics[width=\textwidth]{replay.png}    
+    \end{center}
+    \caption{Playing a replay}
+    \label{fig:replay}
+\end{framed}
+\end{wrapfigure}
+
+To conduct our experiments we utilized GameTrace logging.
+This also allowed us to replay all of the synchronized events using a Replay application we constructed.
+It also allowed us to simulate the timings of the events as they happened by using the GameTrace timestamps.
+Because the synchronized events include all move related events we can see \textit{spawns}, \textit{moves} and \textit{deaths} of all units in an abitrary GameTrace.
+Our replayer only plays single GameTraces, but multiple GameTraces from all Execution Machines could be combined to also reconstruct all \textit{heal} and \textit{damage} events.
+A screenshot of a replay being run can be seen in \autoref{fig:replay}.
+
 Here we present our experimental results.
 
 \section{Discussion}
