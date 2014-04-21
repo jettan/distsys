@@ -83,11 +83,6 @@ public class Deployer {
 		System.out.println("\t" + EXECUTION_MACHINE_COUNT + " ExecutionMachine");
 		System.out.println("\t" + DRAGON_COUNT + " Client DRAGON");
 		System.out.println("\t" + PLAYER_COUNT + " Client PLAYER");
-		System.out.println();
-		System.out.println("Press ENTER to quit experiment");
-		System.in.read();
-		
-		deleteKnownMachines(machines);
 	}
 	
 	private static void deleteKnownMachines(LinkedList<String> machines) throws InterruptedException, IOException{
