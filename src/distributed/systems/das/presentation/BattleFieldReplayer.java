@@ -22,6 +22,7 @@ public class BattleFieldReplayer extends JPanel implements Runnable {
 	
 	private final Scanner file;
 	private final ReplayUnit[][] map = new ReplayUnit[BattleField.MAP_WIDTH][BattleField.MAP_HEIGHT];
+	private boolean playing = true;
 	
 	public BattleFieldReplayer() throws FileNotFoundException{
 		File folder = new File(new File("").getAbsolutePath());
@@ -50,7 +51,11 @@ public class BattleFieldReplayer extends JPanel implements Runnable {
 		double xRatio = (double)this.getWidth() / (double)BattleField.MAP_WIDTH;
 		double yRatio = (double)this.getHeight() / (double)BattleField.MAP_HEIGHT;
 		
-		g.setColor(Color.WHITE);
+		Color bgcol = playing ? Color.WHITE : Color.LIGHT_GRAY;
+		Color drgncol = playing ? Color.RED : new Color(227, 99, 80);
+		Color plyrcol = playing ? Color.BLUE : new Color(153, 194, 181);
+		
+		g.setColor(bgcol);
 		g.fillRect(0, 0, this.getWidth(), this.getHeight());
 		
 		for(int i = 0; i < BattleField.MAP_WIDTH; i++, x += xRatio, y = 0)
@@ -66,9 +71,9 @@ public class BattleFieldReplayer extends JPanel implements Runnable {
 				int id = u.getId();
 
 				if (type == UnitType.dragon)
-					g.setColor(Color.RED);
+					g.setColor(drgncol);
 				else if (type == UnitType.player)
-					g.setColor(Color.BLUE);
+					g.setColor(plyrcol);
 				else
 					g.setColor(Color.BLACK);
 				
@@ -163,8 +168,11 @@ public class BattleFieldReplayer extends JPanel implements Runnable {
 		}
 		
 		System.out.println("Replay done!");
-		
+		playing = false;
 		file.close();
+		
+		invalidate();
+		repaint();
 	}
 	
 	private Point findUnit(int id){
