@@ -1,0 +1,50 @@
+=======
+Time (ms) until last connect
+=======
+single_machine (1 Physical machine, 2 Execution Machines):
+10 clients: 4057	405.70/c
+20 clients: 11669	583.45/c
+30 clients: 13949	464.97/c
+40 clients: 22604	565.10/c
+dual_machines (2 Physical machines, 2 Execution Machines):
+10 clients: 2115	211.50/c
+20 clients: 5842	292.10/c
+30 clients: 14145	471.50/c
+40 clients: 12805	320.13/c
+
+=======
+Events per second (WITH setup)
+=======
+single_machine (1 Physical machine, 2 Execution Machines):
+10 clients: 47.79	4.78/c
+20 clients: 63.35	3.17/c
+30 clients: 69.30	2.31/c
+40 clients: 66.91	1.67/c
+dual_machines (2 Physical machines, 2 Execution Machines):
+10 clients: 63.51	6.35/c
+20 clients: 98.76	4.94/c
+30 clients: 84.75	2.83/c
+40 clients: 117.51	2.94/c
+
+=======
+Events per second (WITHOUT setup)
+=======
+single_machine (1 Physical machine, 2 Execution Machines):
+10 clients: 52.03	5.20/c
+20 clients: 83.59	4.18/c
+30 clients: 88.76	2.96/c	
+40 clients: 102.23	2.56/c
+dual_machines (2 Physical machines, 2 Execution Machines):
+10 clients: 65.72	6.57/c
+20 clients: 111.67	5.58/c
+30 clients: 114.03	3.80/c
+40 clients: 147.85	3.70/c
+
+=======
+Events per second (WITHOUT setup) during crash, 10 clients
+2 Physical machines, 3 Execution Machines -> 
+  2 Physical machines, 2 Execution Machines
+=======
+26.60	2.66/c
+34.52	3.45/c
+33.77	3.38/c
