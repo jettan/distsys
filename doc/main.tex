@@ -283,6 +283,36 @@ Dual & 40 &147.85 &3.70 \\
 \label{tab:expeventswithout}
 \end{table}
 
+\begin{table}
+\centering
+\begin{tabular}{| l | c | c |}
+\hline
+\textbf{Deployment} & \textbf{Event} & \textbf{Slowdown (Events/Second/Client)} \\
+\hline
+\hline
+Single & Connection (10 clients) & 0.42\\
+\hline
+Single & Connection (20 clients) & 1.01\\
+\hline
+Single & Connection (30 clients) & 0.65\\
+\hline
+Single & Connection (40 clients) & 0.89\\
+\hline
+Dual & Connection (10 clients) & 0.22\\
+\hline
+Dual & Connection (20 clients) & 0.64\\
+\hline
+Dual & Connection (30 clients) & 0.97\\
+\hline
+Dual & Connection (40 clients) & 0.76\\
+\hline
+Dual & Server drop (10 clients) & 3.69\\
+\hline
+\end{tabular}
+\caption{Performance loss per client}
+\label{tab:expaggregateloss}
+\end{table}
+
 \section{Discussion}
 \label{sec:discussion}
 The first thing we note is that even though the central manager does not do any of the heavy lifting data-wise, it is a central point of failure.
