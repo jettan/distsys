@@ -183,7 +183,105 @@ Because the synchronized events include all move related events we can see \text
 Our replayer only plays single GameTraces, but multiple GameTraces from all Execution Machines could be combined to also reconstruct all \textit{heal} and \textit{damage} events.
 A screenshot of a replay being run can be seen in \autoref{fig:replay}.
 
-Here we present our experimental results.
+The initial plan was to run experiments on the DAS4 cluster.
+However, due to unexpected problems with the cluster we were forced to do smaller scale testing with two laptops.
+The tests we performed are categorized by two deployments: 
+
+\begin{itemize}
+\item Single Machine: 1 Physical Machine, 2 Execution Machines
+\item Dual Machine: 2 Physical Machines, 2 Execution Machines
+\end{itemize}
+
+What we measured was the time until last connect (\autoref{tab:explastconnect}), the  events per second with connection phase(\autoref{tab:expeventswith}),
+the events per second without connection phase (\autoref{tab:expeventswithout}) and 
+lastly we also measured the performance hit on the system when a server dropped.
+
+\begin{table}
+\centering
+\begin{tabular}{| l | c | c | c |}
+\hline
+\textbf{Deployment} & \textbf{Clients} & \textbf{Time (ms)}  & \textbf{Time (ms)/Client} \\
+\hline
+\hline
+Single & 10 & 4057 & 405.70\\
+\hline
+Single & 20 & 11669 &583.45 \\
+\hline
+Single & 30& 13949 & 464.97\\
+\hline
+Single & 40& 22604 & 565.10\\
+\hline
+\hline
+Dual & 10 & 2115 &211.50 \\
+\hline
+Dual & 20 & 5842 &292.10 \\
+\hline
+Dual & 30 & 14145 &471.50 \\
+\hline
+Dual & 40 & 12805 &320.13 \\
+\hline
+\end{tabular}
+\caption{Time until last connect}
+\label{tab:explastconnect}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{| l | c | c | c |}
+\hline
+\textbf{Deployment} & \textbf{Clients} & \textbf{Events/Second}  & \textbf{Events/Second/Client} \\
+\hline
+\hline
+Single & 10 & 47.79& 4.78\\
+\hline
+Single & 20 &63.35 &3.17 \\
+\hline
+Single & 30& 69.30& 2.31\\
+\hline
+Single & 40& 66.91& 1.67\\
+\hline
+\hline
+Dual & 10 & 63.51& 6.35\\
+\hline
+Dual & 20 & 98.76&4.94 \\
+\hline
+Dual & 30 & 84.75&2.83 \\
+\hline
+Dual & 40 &117.51 & 2.94\\
+\hline
+\end{tabular}
+\caption{Events per second with connection phase}
+\label{tab:expeventswith}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{| l | c | c | c |}
+\hline
+\textbf{Deployment} & \textbf{Clients} & \textbf{Events/Second}  & \textbf{Events/Second/Client} \\
+\hline
+\hline
+Single & 10 & 52.03& 5.20\\
+\hline
+Single & 20 & 83.59& 4.18\\
+\hline
+Single & 30&88.76 & 2.96\\
+\hline
+Single & 40&102.23 & 2.56\\
+\hline
+\hline
+Dual & 10 & 65.72&6.57 \\
+\hline
+Dual & 20 &111.67 &5.58 \\
+\hline
+Dual & 30 &  114.03&3.80 \\
+\hline
+Dual & 40 &147.85 &3.70 \\
+\hline
+\end{tabular}
+\caption{Events per second without connection phase}
+\label{tab:expeventswithout}
+\end{table}
 
 \section{Discussion}
 \label{sec:discussion}
@@ -193,7 +291,7 @@ So even though it scales well, we are not completely happy with it.
 Secondly even though the unidirectional ring structure for the execution machines is very scalable and simple to understand,
 it comes with a notable performance hit.
 To illustrate this: on a single machine utilizing five servers in our distributed structure is about three times as slow as a single server threaded RMI implementation.
-In theory our design should outperform the single server solution due to sheer load though (even though we have not hit this point yet).
+Our design should outperform the single server solution due to sheer load though, which is supported by our experiments.
 
 The third thing that we would like to discuss is the load balancing with a dynamic set of servers.
 When a server drops the Condor-like load balancing makes sure that the servers receive an equal load of clients.
