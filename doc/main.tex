@@ -322,8 +322,12 @@ So even though it scales well, we are not completely happy with it.
 
 Secondly even though the unidirectional ring structure for the execution machines is very scalable and simple to understand,
 it comes with a notable performance hit.
-To illustrate this: on a single machine utilizing five servers in our distributed structure is about three times as slow as a single server threaded RMI implementation.
-Our design should outperform the single server solution due to sheer load though, which is supported by our experiments.
+To illustrate this: on a single machine utilizing five servers in our distributed structure is about two times as slow as a single server threaded RMI implementation.
+This would make for a target of about 10 events per second per client.
+From \autoref{tab:expeventswithout} we can see that the more physical machines per client we have, the better our system performs.
+If we assume the payoff of physical machines is bounded logarithmically with a quick calculation we estimate we will never go over 8 events/second/client though.
+However, under heavy load our design should outperform the single server solution, as we see in the data adding a server negates the performance
+loss of about 10 clients.
 
 The third thing that we would like to discuss is the load balancing with a dynamic set of servers.
 When a server drops the Condor-like load balancing makes sure that the servers receive an equal load of clients.
