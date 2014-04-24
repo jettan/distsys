@@ -194,7 +194,7 @@ The tests we performed are categorized by two deployments:
 
 What we measured was the time until last connect (\autoref{tab:explastconnect}), the  events per second with connection phase(\autoref{tab:expeventswith}),
 the events per second without connection phase (\autoref{tab:expeventswithout}) and 
-lastly we also measured the performance hit on the system when a server dropped.
+lastly we also measured the performance hit on the system when a server dropped (\autoref{tab:expaggregateloss}).
 
 \begin{table}
 \centering
@@ -285,28 +285,28 @@ Dual & 40 &147.85 &3.70 \\
 
 \begin{table}
 \centering
-\begin{tabular}{| l | c | c |}
+\begin{tabular}{| l | c | c r |}
 \hline
-\textbf{Deployment} & \textbf{Event} & \textbf{Slowdown (Events/Second/Client)} \\
+\textbf{Deployment} & \textbf{Event} & \textbf{Slowdown (Events/S/Client)} & \\
 \hline
 \hline
-Single & Connection (10 clients) & 0.42\\
+Single & Connection (10 clients) & 0.42  & 8\%\\
 \hline
-Single & Connection (20 clients) & 1.01\\
+Single & Connection (20 clients) & 1.01  & 24\%\\
 \hline
-Single & Connection (30 clients) & 0.65\\
+Single & Connection (30 clients) & 0.65  & 21\%\\
 \hline
-Single & Connection (40 clients) & 0.89\\
+Single & Connection (40 clients) & 0.89  & 35\%\\
 \hline
-Dual & Connection (10 clients) & 0.22\\
+Dual & Connection (10 clients) & 0.22  & 3\%\\
 \hline
-Dual & Connection (20 clients) & 0.64\\
+Dual & Connection (20 clients) & 0.64  & 11\%\\
 \hline
-Dual & Connection (30 clients) & 0.97\\
+Dual & Connection (30 clients) & 0.97  & 26\%\\
 \hline
-Dual & Connection (40 clients) & 0.76\\
+Dual & Connection (40 clients) & 0.76  & 21\%\\
 \hline
-Dual & Server drop (10 clients) & 3.69\\
+Dual & Server drop (10 clients) & 3.69  & 56\%\\
 \hline
 \end{tabular}
 \caption{Performance loss per client}
