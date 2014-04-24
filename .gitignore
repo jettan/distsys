@@ -4,3 +4,15 @@ bin/
 *.swp
 .project
 .settings/
+doc/main.aux
+doc/main.bbl
+doc/main.blg
+doc/main.log
+doc/main.out
+doc/main.pdf
+doc/main.synctex.gz
+CentralManager.jar
+Client.jar
+Deployer.jar
+ExecutionMachine.jar
+SHUTDOWN
