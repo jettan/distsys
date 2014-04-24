@@ -22,6 +22,7 @@
 \usepackage{soul}
 \usepackage{wrapfig}
 \usepackage{framed}
+\usepackage{pgfplots}
 \restylefloat{table}
 \usetikzlibrary{arrows,automata}
 
@@ -117,7 +118,7 @@ If one of the two execution machines of a client crashes, the other (backup) exe
 A new server is then allocated for the client so it once again has two servers to fall back on.
 In the event both servers go down at once, the client will experience a short desynchronization.
 
-One might think that relying on a central component like the central manager makes the system have single point of failure,
+First of all, the central manager does make the system have single point of failure,
 as opposed to the original Condor architecture, which also include submission machines.
 In the Condor architecture, the central manager acts like a \emph{matchmaker} and matches jobs with machines.
 It would then notify the submission machine that in turn starts a shadow process (representation of the remote job) on the execution machines.
@@ -183,7 +184,7 @@ Because the synchronized events include all move related events we can see \text
 Our replayer only plays single GameTraces, but multiple GameTraces from all Execution Machines could be combined to also reconstruct all \textit{heal} and \textit{damage} events.
 A screenshot of a replay being run can be seen in \autoref{fig:replay}.
 
-The initial plan was to run experiments on the DAS4 cluster.
+Initially, the system was deployed on the DAS4 cluster experiments were supposed to happen.
 However, due to unexpected problems with the cluster we were forced to do smaller scale testing with two laptops.
 The tests we performed are categorized by two deployments: 
 
@@ -192,10 +193,11 @@ The tests we performed are categorized by two deployments:
 \item Dual Machine: 2 Physical Machines, 2 Execution Machines
 \end{itemize}
 
-What we measured was the time until last connect (\autoref{tab:explastconnect}), the  events per second with connection phase(\autoref{tab:expeventswith}),
+What we measured was the time until last connect (\autoref{tab:explastconnect}),
+the events per second with connection phase(\autoref{tab:expeventswith}),
 the events per second without connection phase (\autoref{tab:expeventswithout}) and 
-lastly we also measured the performance hit on the system when a server dropped (\autoref{tab:expaggregateloss}).
-All of the experiments were performed over a thirty second time frame and the events per second for each experiment was calculated 
+finally we also measured the performance hit on the system when a server dropped (\autoref{tab:expaggregateloss}).
+All of the experiments were performed over a 30 second time frame and the events per second for each experiment was calculated 
 using the millisecond timestamps from each GameTrace.
 
 \begin{table}
@@ -227,6 +229,58 @@ Dual & 40 & 12805 &320.13 \\
 \label{tab:explastconnect}
 \end{table}
 
+\begin{figure}
+% Preamble: \pgfplotsset{width=7cm,compat=1.10}
+\begin{tikzpicture}
+\begin{axis}[
+width=6cm,
+x tick label style={
+/pgf/number format/1000 sep=},
+ylabel=Time taken(ms),
+enlargelimits=0.15,
+legend style={at={(0.5,-0.15)},
+anchor=north,legend columns=-1},
+ybar,
+bar width=7pt,
+]
+\addplot
+coordinates {(10,4057) (20,11669)
+(30,13949) (40,22604)};
+\addplot
+coordinates {(10,2115) (20,5842)
+(30,14145) (40,12805)};
+
+coordinates {(0,4.3e7) (40,4.3e7)}
+\legend{Single machine, Dual machine}
+\end{axis}
+\end{tikzpicture}
+% Preamble: \pgfplotsset{width=7cm,compat=1.10}
+\begin{tikzpicture}
+\begin{axis}[
+width=6cm,
+x tick label style={
+/pgf/number format/1000 sep=},
+ylabel=Time taken per client (ms/client),
+enlargelimits=0.15,
+legend style={at={(0.5,-0.15)},
+anchor=north,legend columns=-1},
+ybar,
+bar width=7pt,
+]
+\addplot
+coordinates {(10,405.7) (20,583.45)
+(30, 464.97) (40,565.1)};
+\addplot
+coordinates {(10,211.5) (20,292.1)
+(30,471.5) (40,320.31)};
+
+coordinates {(0,4.3e7) (40,4.3e7)}
+\legend{Single machine, Dual machine}
+\end{axis}
+\end{tikzpicture}
+\caption{Time until last connect}
+\end{figure}
+
 \begin{table}
 \centering
 \begin{tabular}{| l | c | c | c |}
@@ -256,6 +310,59 @@ Dual & 40 &117.51 & 2.94\\
 \label{tab:expeventswith}
 \end{table}
 
+
+\begin{figure}
+% Preamble: \pgfplotsset{width=7cm,compat=1.10}
+\begin{tikzpicture}
+\begin{axis}[
+width=6cm,
+x tick label style={
+/pgf/number format/1000 sep=},
+ylabel=Events per sec,
+enlargelimits=0.15,
+legend style={at={(0.5,-0.15)},
+anchor=north,legend columns=-1},
+ybar,
+bar width=7pt,
+]
+\addplot
+coordinates {(10,47.79) (20,63.35)
+(30,69.30) (40,66.91)};
+\addplot
+coordinates {(10,63.51) (20,98.76)
+(30,84.75) (40,117.51)};
+
+coordinates {(0,4.3e7) (40,4.3e7)}
+\legend{Single machine, Dual machine}
+\end{axis}
+\end{tikzpicture}
+% Preamble: \pgfplotsset{width=7cm,compat=1.10}
+\begin{tikzpicture}
+\begin{axis}[
+width=6cm,
+x tick label style={
+/pgf/number format/1000 sep=},
+ylabel=Events per sec per client,
+enlargelimits=0.15,
+legend style={at={(0.5,-0.15)},
+anchor=north,legend columns=-1},
+ybar,
+bar width=7pt,
+]
+\addplot
+coordinates {(10,4.78) (20,3.17)
+(30, 2.31) (40,1.67)};
+\addplot
+coordinates {(10,6.35) (20,4.94)
+(30,2.83) (40,2.94)};
+
+coordinates {(0,4.3e7) (40,4.3e7)}
+\legend{Single machine, Dual machine}
+\end{axis}
+\end{tikzpicture}
+\caption{Events per seconds with connection phase}
+\end{figure}
+
 \begin{table}
 \centering
 \begin{tabular}{| l | c | c | c |}
@@ -284,6 +391,59 @@ Dual & 40 &147.85 &3.70 \\
 \caption{Events per second without connection phase}
 \label{tab:expeventswithout}
 \end{table}
+
+
+\begin{figure}
+% Preamble: \pgfplotsset{width=7cm,compat=1.10}
+\begin{tikzpicture}
+\begin{axis}[
+width=6cm,
+x tick label style={
+/pgf/number format/1000 sep=},
+ylabel=Events per sec,
+enlargelimits=0.15,
+legend style={at={(0.5,-0.15)},
+anchor=north,legend columns=-1},
+ybar,
+bar width=7pt,
+]
+\addplot
+coordinates {(10,52.03) (20,83.59)
+(30,88.76) (40,102.23)};
+\addplot
+coordinates {(10,65.72) (20,111.67)
+(30,114.03) (40,147.58)};
+
+coordinates {(0,4.3e7) (40,4.3e7)}
+\legend{Single machine, Dual machine}
+\end{axis}
+\end{tikzpicture}
+% Preamble: \pgfplotsset{width=7cm,compat=1.10}
+\begin{tikzpicture}
+\begin{axis}[
+width=6cm,
+x tick label style={
+/pgf/number format/1000 sep=},
+ylabel=Events per sec per client,
+enlargelimits=0.15,
+legend style={at={(0.5,-0.15)},
+anchor=north,legend columns=-1},
+ybar,
+bar width=7pt,
+]
+\addplot
+coordinates {(10,5.2) (20,4.18)
+(30, 2.96) (40,2.56)};
+\addplot
+coordinates {(10,6.57) (20,5.58)
+(30,3.8) (40,3.7)};
+
+coordinates {(0,4.3e7) (40,4.3e7)}
+\legend{Single machine, Dual machine}
+\end{axis}
+\end{tikzpicture}
+\caption{Events per seconds without connection phase}
+\end{figure}
 
 \begin{table}
 \centering
