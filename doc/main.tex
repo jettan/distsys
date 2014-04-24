@@ -26,6 +26,9 @@
 \restylefloat{table}
 \usetikzlibrary{arrows,automata}
 
+\widowpenalties 1 10000
+\raggedbottom
+
 \begin{document}
 \begin{titlepage}
 			\begin{center}
@@ -120,16 +123,6 @@ If one of the two execution machines of a client crashes, the other (backup) exe
 A new server is then allocated for the client so it once again has two servers to fall back on.
 In the event both servers go down at once, the client will experience a short desynchronization.
 
-First of all, the central manager does make the system have single point of failure,
-as opposed to the original Condor architecture, which also include submission machines.
-In the Condor architecture, the central manager acts like a \emph{matchmaker} and matches jobs with machines.
-It would then notify the submission machine that in turn starts a shadow process (representation of the remote job) on the execution machines.
-In our architecture, we completely skip the steps involving the submission machine and let the client start its job on the allocated execution machines.
-
-Each component of the system (central manager, execution machines and client) has a \emph{heartbeat} to let the rest system know that he is still alive.
-This heartbeat is organized hierarchically so that there is no single overloaded point in the system.
-As soon as a heartbeat is not received anymore from that particular component, we know that component has crashed.
-
 \begin{wrapfigure}{r}{0.5\textwidth}
 \begin{framed}
     \begin{center}
@@ -140,6 +133,15 @@ As soon as a heartbeat is not received anymore from that particular component, w
 \end{framed}
 \end{wrapfigure}
 
+First of all, the central manager does make the system have single point of failure,
+as opposed to the original Condor architecture, which also include submission machines.
+In the Condor architecture, the central manager acts like a \emph{matchmaker} and matches jobs with machines.
+It would then notify the submission machine that in turn starts a shadow process (representation of the remote job) on the execution machines.
+In our architecture, we completely skip the steps involving the submission machine and let the client start its job on the allocated execution machines.
+
+Each component of the system (central manager, execution machines and client) has a \emph{heartbeat} to let the rest system know that he is still alive.
+This heartbeat is organized hierarchically so that there is no single overloaded point in the system.
+As soon as a heartbeat is not received anymore from that particular component, we know that component has crashed.
 
 To get a scalable design in terms of server state synchronization we have utilized a unidirectional ring.
 This allows us to handle servers being added and dropped rather easily, as only one existing machine in the ring
@@ -195,9 +197,9 @@ The tests we performed are categorized by two deployments:
 \item Dual Machine: 2 Physical Machines, 2 Execution Machines
 \end{itemize}
 
-What we measured was the time until last connect (\autoref{tab:explastconnect}),
-the events per second with connection phase(\autoref{tab:expeventswith}),
-the events per second without connection phase (\autoref{tab:expeventswithout}) and 
+What we measured was the time until last connect (\autoref{tab:explastconnect}, \autoref{fig:explastconnect}),
+the events per second with connection phase (\autoref{tab:expeventswith}, \autoref{fig:expeventswith}),
+the events per second without connection phase (\autoref{tab:expeventswithout}, \autoref{fig:expeventswithout}) and 
 finally we also measured the performance hit on the system when a server dropped (\autoref{tab:expaggregateloss}).
 All of the experiments were performed over a 30 second time frame and the events per second for each experiment was calculated 
 using the millisecond timestamps from each GameTrace.
@@ -281,6 +283,7 @@ coordinates {(0,4.3e7) (40,4.3e7)}
 \end{axis}
 \end{tikzpicture}
 \caption{Time until last connect}
+\label{fig:explastconnect}
 \end{figure}
 
 \begin{table}
@@ -363,6 +366,7 @@ coordinates {(0,4.3e7) (40,4.3e7)}
 \end{axis}
 \end{tikzpicture}
 \caption{Events per seconds with connection phase}
+\label{fig:expeventswith}
 \end{figure}
 
 \begin{table}
@@ -445,6 +449,7 @@ coordinates {(0,4.3e7) (40,4.3e7)}
 \end{axis}
 \end{tikzpicture}
 \caption{Events per seconds without connection phase}
+\label{fig:expeventswithout}
 \end{figure}
 
 \begin{table}
@@ -498,7 +503,12 @@ Instead it will simply take in all the new clients and very slowly distribute th
 
 \section{Conclusion}
 \label{sec:conclusion}
-In this project...
+In this paper we have presented a distributed application for the Dragon Arena System.
+This paper has shown how the presented solution performs better as the physical machine to client ratio increases.
+Although performance of the server ring will by estimation never be as good as that of a single machine.
+For this ring we show that adding an extra server improves performance by the same amount as the load of 10 clients.
+Furthermore, we see that our advanced fault tolerence has a 56\% performance hit during relocating clients.
+Lastly we note that our design with a central manager suffers from a single point of failure, which is acceptable, but not ideal.
 
 \newpage
 \section*{Appendix}
